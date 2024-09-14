@@ -1,0 +1,57 @@
+/******************************************
+/* CSS
+/*******************************************/
+
+/* Box Model Hack */
+*{
+  box-sizing: border-box;
+}
+
+/******************************************
+/* LAYOUT
+/*******************************************/
+iframe  {
+            
+  width: 100%;  /* as  wide as is at can be*/
+  height: 50em; 
+}
+
+body{
+  background-color: rgb(243, 208, 118);
+  margin: 5%;
+  padding: 2%;
+}
+
+header nav { 
+  display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 0  ;
+margin: 0 ; 
+
+}
+
+nav ul{
+  list-style-type: none;
+  display:flex;
+  align-items: center;
+}
+
+nav ul li {
+  padding: 1em 2em;
+  color: black;
+}
+
+nav ul li a:visited{
+  color: black;
+}
+
+video {
+  width: 100vw; /* Take up the entire width of the viewport */
+  height: auto; 
+}
+
+
+/******************************************
+/* ADDITIONAL STYLES
+/*******************************************/
