@@ -1,0 +1,77 @@
+/******************************************
+/* CSS
+/*******************************************/
+
+/* Box Model Hack */
+*{
+  box-sizing: border-box;
+}
+
+/******************************************
+/* LAYOUT
+/*******************************************/
+
+
+body{
+  background-color: rgb(243, 208, 118);
+  margin: 5%;
+  padding: 2%;
+}
+.title {
+  font-family: 'Lucida Handwriting',cursive;
+  border: 1px solid;
+}
+
+header nav { 
+  display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 0  ;
+margin: 0 ; 
+
+}
+
+nav ul{
+  list-style-type: none;
+  display:flex;
+  align-items: center;
+}
+
+nav ul li {
+  padding: 1em 2em;
+  color: black;
+}
+
+nav ul li a:visited{
+  color: black;
+}
+
+
+
+
+p { font-family: monospace;
+    font-size: medium;
+  }
+
+
+  form {
+    max-width: 30%;
+    border: 1px solid;
+    padding: 4em;
+    margin: 3em;
+  }
+  
+
+  form input {margin: 1em; }
+  form input label{ color: black; color}
+  
+
+
+
+
+
+
+
+/******************************************
+/* ADDITIONAL STYLES
+/*******************************************/
