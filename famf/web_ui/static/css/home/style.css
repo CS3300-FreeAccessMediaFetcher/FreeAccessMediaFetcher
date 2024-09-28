@@ -1,77 +1,139 @@
+<style >
 /******************************************
-/* CSS
-/*******************************************/
-
-/* Box Model Hack */
-*{
-  box-sizing: border-box;
+    /* Box Model Hack */
+* {
+    box-sizing: border-box;
 }
 
 /******************************************
-/* LAYOUT
-/*******************************************/
+    /* LAYOUT */
 
-
-body{
-  background-color: rgb(243, 208, 118);
-  margin: 5%;
-  padding: 2%;
+body {
+    background-color: rgb(243, 208, 118);
+    margin: 5%; 
+    padding: 2%;
 }
+
 .title {
-  font-family: 'Lucida Handwriting',cursive;
-  border: 1px solid;
-}
-
-header nav { 
-  display: flex;
-justify-content: space-between;
-align-items: center;
-padding: 0  ;
-margin: 0 ; 
-
-}
-
-nav ul{
-  list-style-type: none;
-  display:flex;
-  align-items: center;
-}
-
-nav ul li {
-  padding: 1em 2em;
-  color: black;
-}
-
-nav ul li a:visited{
-  color: black;
-}
-
-
-
-
-p { font-family: monospace;
-    font-size: medium;
-  }
-
-
-  form {
-    max-width: 30%;
+    font-family: 'Lucida Handwriting', cursive;
     border: 1px solid;
-    padding: 4em;
-    margin: 3em;
-  }
-  
+}
 
-  form input {margin: 1em; }
-  form input label{ color: black; color}
-  
+header nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+}
 
+nav ul {
+    list-style-type: none;
+    display: flex;
+    align-items: center;
+}
 
+    nav ul li {
+        padding: 1em 2em;
+        color: black;
+    }
 
+        nav ul li a:visited {
+            color: black;
+        }
 
+p {
+    font-family: monospace;
+    font-size: medium;
+}
 
+header div {
+    background-color: lightgray;
+}
 
+.s1 {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.form-container {
+    flex: 1;
+    padding-right: 20px;
+}
+
+.filter-box {
+    background-color: #ddd;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#output {
+    flex: 0 0 30%;
+    margin-left: 10px;
+}
+table#controller_table {
+    flex: 0 0 30%;
+    height: 20px;
+    width: 30%;
+    margin: 1em ;
+
+}
+
+table {
+    width: 100%;
+    border: 1px solid black;
+    border-collapse: collapse;
+    background-color: lightgray;
+}
+
+th,
+td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+}
+
+.parent-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    border: 1px solid black;
+}
+
+input[type="text"] {
+    width: 80%;
+    max-width: 400px;
+    padding: 10px;
+    font-size: 16px;
+}
+
+button {
+    padding: 5px;
+    font-size: small;
+    max-width: 5em;
+    height: 3em;
+}
+form {
+    border: 1px solid black;
+    min-width :203px;
+}
+
+section#output {
+    display: flex;
+    float: right;
+}
+
+section table {
+    float: right;
+    width: 50%;
+    align-content: start;
+    border: 1px solid black;
+}
 
 /******************************************
-/* ADDITIONAL STYLES
-/*******************************************/
+    /* ADDITIONAL STYLES */
