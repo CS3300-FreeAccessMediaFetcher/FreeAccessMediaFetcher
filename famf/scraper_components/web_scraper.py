@@ -129,15 +129,11 @@ def retrieveDataByName(inc_dataName):
 scraping_site = "https://books.toscrape.com"
 # scraping_site = "http://quotes.toscrape.com"
 
-dataCollection(scraping_site)
-
-
-
-
-print("",textCounter, "blobs of text collected\n",linkCounter,"links collected\n",imageCounter,"images collected\n",otherCounter,"bits of unkown data collected")
-
 
 #This is solely for testing
+'''
+dataCollection(scraping_site)
+print("",textCounter, "blobs of text collected\n",linkCounter,"links collected\n",imageCounter,"images collected\n",otherCounter,"bits of unkown data collected")
 
 retrievalType = input("Enter if you want type or name:")
 
@@ -150,3 +146,6 @@ elif retrievalType == "name":
     retrieveDataByName(retrieveDataTest)
 else:
     print("Invalid choice")
+'''
+
+
