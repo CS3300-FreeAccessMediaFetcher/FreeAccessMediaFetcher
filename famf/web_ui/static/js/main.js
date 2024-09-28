@@ -85,11 +85,9 @@ function addElementTable(type, name, size, link, checked = true, preview) {
     
    
     function RemoveFromQue(){
-
     }
 
     function addAllToQue(){
-
     }
 
 
@@ -101,6 +99,58 @@ function addElementTable(type, name, size, link, checked = true, preview) {
         // download each item from array : remove each item from array. 
 
     }
+
+async function validateURL(url) {
+  try {
+    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+    const response = await fetch(proxyUrl + url, { method: 'GET' });
+
+    if (response.ok) {
+      console.log("validate " + url + " = TRUE");
+      return true;
+
+    } else {
+      console.log("validate " + url + " = FALSE");
+      alert("URL invalid");
+      return false;
+    }
+
+  } catch (error) {
+    alert("Request invalid");
+    console.log("Error validating URL:", error);
+    return false;
+  }
+
+}
+           
+  
+
+  document.addEventListener('DOMContentLoaded', () => {
+  
+  // Select the input field and search button
+  const searchButton = document.getElementById('search_button');
+  const urlInput = document.getElementById('url_search');
+
+  // Add event listener to the search button
+  searchButton.addEventListener('click', (event) => {
+    // Prevent default form submission
+    event.preventDefault();
+
+
+    
+    // Get the URL from the input field
+    const url = urlInput.value;
+    console.log("searching... \""+url+"\"");
+    if (validateURL(url)){
+
+    }else{
+    
+    };
+
+  });
+});
+
+
 
 
   
