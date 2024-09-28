@@ -12,6 +12,7 @@ imageCounter = 0
 otherCounter = 0
 dataSet = {}
 dictIndex = 0
+validDataTypes = ['web_page', 'text', 'image', 'audio', 'video']
 
 
 class siteObject:
@@ -20,6 +21,13 @@ class siteObject:
         self.dataName = dataName
         self.dataSize = dataSize
         self.data = data
+
+
+# INPUT FROM FLASK #
+def webScraperInput(url: str, data_type: str):
+    pass
+
+###################
 
 
 def dataCollection(inc_website : str):
