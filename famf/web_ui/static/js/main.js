@@ -1,3 +1,5 @@
+
+
 // Add  to the table 
 function addElementTable(type, name, size, link, checked = true, preview) {
     // Get the table body
@@ -63,42 +65,30 @@ function addElementTable(type, name, size, link, checked = true, preview) {
   
   //Remove element to the table
   function removeRowFromTable(){
-    
   }
 
-  //Remove all elements from table
+  //remove all elements from table
   function clearTable(){
     const tableBody = document.querySelector("#output_table tbody")
     tableBody.innerHTML ="";
   }
-  
-  // 
-  function addAllToQue(){
-    /* 
-    when the download box is cheaked:
-    add all items to an array 
-      */
 
-    // return array 
+const form = document.querySelector("form");
+const log = document.querySelector("#log");
+
+form.addEventListener(
+  "submit",
+  (event) => {
+    const data = new FormData(form);
+    let output = "";
+    for (const entry of data) {
+      output = `${output}${entry[0]}=${entry[1]}\r`;
     }
-    const tableBody = document.querySelector("#output_table tbody");
-    
-   
-    function RemoveFromQue(){
-    }
-
-    function addAllToQue(){
-    }
-
-
-
-    function downloadlist (){
-
-        //add all to list : returned array 
-
-        // download each item from array : remove each item from array. 
-
-    }
+    log.innerText = output;
+    event.preventDefault();
+  },
+  false,
+);
 
 async function validateURL(url) {
   try {
@@ -122,35 +112,79 @@ async function validateURL(url) {
   }
 
 }
-           
-  
 
-  document.addEventListener('DOMContentLoaded', () => {
-  
-  // Select the input field and search button
+function dataTypeSelector() {
+  const radios = document.getElementsByClassName('retriever');
+  for (let i = 0; i < radios.length; i++) {
+    if (radios[i].checked) {
+      return radios[i].value;
+    }
+  }
+  return null;
+}
+
+function getURL(){
+  const url = document.getElementById('url_search').value;
+  return url;
+}
+
+// -------------------- POST
+function postToFlask( url, data_type){
+  api_endpoint = '/web-scrape-submission-handler';
+  user_input = [url, data_type];
+
+  fetch(api_endpoint, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(user_input)
+})
+
+}
+
+
+
+// Make POST request using fetch
+fetch(api_endpoint, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(user_input)
+})
+.then(response => response.json())  // Parse the JSON from the response
+.then(data => {
+    console.log('Success:', data);   // Handle the response data
+})
+.catch((error) => {
+    console.error('Error:', error);  // Handle any errors
+});
+
+// -------------------- POST
+
+document.addEventListener('DOMContentLoaded', () => { 
   const searchButton = document.getElementById('search_button');
-  const urlInput = document.getElementById('url_search');
+  
 
-  // Add event listener to the search button
-  searchButton.addEventListener('click', (event) => {
-    // Prevent default form submission
-    event.preventDefault();
-
+  searchButton.addEventListener('click', async (event) => {
+    event.preventDefault(); // prevent default form submission
+    const url = getURL();
+    let data_type = dataTypeSelector();
+    console.log("selected dataType value: "+data_type);
+    
 
     
-    // Get the URL from the input field
-    const url = urlInput.value;
-    console.log("searching... \""+url+"\"");
-    if (validateURL(url)){
+    console.log("searching... \"" + url + "\"");
 
-    }else{
-    
-    };
+    if (await validateURL(url)) {
+      console.log('URL is valid, proceeding...');
+    } else {
+      console.error("Invalid URL");
+    }
 
   });
 });
-
-
 
 
   

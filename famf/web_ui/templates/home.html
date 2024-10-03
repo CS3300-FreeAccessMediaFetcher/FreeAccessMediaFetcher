@@ -32,22 +32,38 @@
             <form class="form" id="GOLDEN RETRIEVER">
                 <a id="formTitle"><h3>GOLDEN RETRIEVER</h3></a>
                 <label for="url">URL:<a class="eg"></a> </label><br /><br />
-                <input type="text" class="retriever" id="url" name="user_input_url" value="https://x.com/rickastley" />
-                <input type="submit" value="Search" /><br /><br />
+                <input type="text" class="retriever" id="url_search" name="user_input_url" value="https://x.com/neiltyson" />
+                <input type="submit" value="Search" id="search_button" class="scraper" /><br /><br />
 
+                
                 <!-- Filter Box -->
                 <div class="filter-box">
-                    <h4>Filters</h4>
-                    <input type="checkbox" class="retriever" id="webpage" name="Webpage retriever " value="Webpage" />
-                    <label>Pull Entire Web Page</label><br />
-                    <input type="checkbox" class="retriever" id="text" name="Text retriever " value="Text" />
-                    <label>Filter Text Blocks</label><br />
-                    <input type="checkbox" class="retriever" id="pics" name="Photos retriever " value="Photos" />
-                    <label>Filter Photos</label><br />
-                    <input type="checkbox" class="retriever" id="Audio" name="Audio retriever " value="Audio" />
-                    <label>Filter Audio</label><br />
-                    <input type="checkbox" class="retriever" id="Video" name="Video retriever " value="Video" />
-                    <label>Filter Video</label>
+                    <h4>Selection</h4>
+                    <form>
+                    <input type="radio" class="retriever" id="webpage" name="retriever_selection" value="web_page" />
+                    <label> Web Page</label><br>
+                    
+                    <input type="radio" class="retriever" id="text" name="retriever_selection" value="text" />
+                    <label>Text Blocks</label><br>
+                    
+                    <input type="radio" class="retriever" id="Photos" name="retriever_selection" value="image" />
+                    <label>Photos</label><br>
+                    
+                    <input type="radio" class="retriever" id="Audio" name="retriever_selection" value="audio" />
+                    <label>Audio</label><br>
+                    
+                    <input type="radio" class="retriever" id="Video" name="retriever_selection" value="video" />
+                    <label>Video</label><br>
+                    </form>
+
+
+
+                    <form>
+                    <input type="radio" class ="Output" id="Video" name="download_type" value="Video" />
+                    <label>Download Raw</label>
+                    <input type="radio" class="Output" id="Video" name="download_type" value="Video" />
+                    <label>Download as Zip</label>
+                    </form>
                 </div>
             </form>
         </div>
@@ -141,7 +157,6 @@
     </section>
 
     <section id="s3"></section>
-
     <script type="text/javascript" src="../static/js/main.js"></script>
 </body>
 </html>
