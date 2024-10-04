@@ -2,6 +2,7 @@ from flask import Flask
 from flask import render_template
 from flask import request
 from scraper_components import web_scraper
+from werkzeug.datastructures import CombinedMultiDict, MultiDict
 
 # GLOBAL VARS#
 HOST_NAME = "localhost"
@@ -23,13 +24,16 @@ def about():
 # HANDLE DATA FROM FRONTEND #
 @app.route('/web-scrape-submission-handler', methods=['POST'])
 def handleWebScraperInput():
-    url = str(request.values["user_input"][0])
-    data_type = str(request.values["user_input"][1])
+    url = str(request.values["url"])
+    data_type = str(request.values["data_type"])
+    res = ""
 
     if data_type in web_scraper.validDataTypes:
-        web_scraper.webScraperInput(url, data_type)
+        res = web_scraper.webScraperInput(url, data_type)
     else:
-        return "Got an invalid data type"
+        res = f"Got an invalid data type: {data_type}"
+    print(res)
+    return res
 
 
 # Start Flask

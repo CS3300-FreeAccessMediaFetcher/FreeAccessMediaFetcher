@@ -25,7 +25,8 @@ class siteObject:
 
 # INPUT FROM FLASK #
 def webScraperInput(url: str, data_type: str):
-    pass
+    print("Hello Flask!")
+    return { "StatusCode": 200 }
 
 ###################
 

@@ -1,5 +1,3 @@
-
-
 // Add  to the table 
 function addElementTable(type, name, size, link, checked = true, preview) {
     // Get the table body
@@ -129,60 +127,34 @@ function getURL(){
 }
 
 // -------------------- POST
-function postToFlask( url, data_type){
+async function postToFlask( url, data_type){
   api_endpoint = '/web-scrape-submission-handler';
-  user_input = [url, data_type];
 
-  fetch(api_endpoint, {
+  // Setup data to send to Flask
+  user_input = new FormData()
+  user_input.append("url", url)
+  user_input.append("data_type", data_type)
+
+  // Send POST request to Flask
+  const response = await fetch(api_endpoint, {
     method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(user_input)
-})
-
+    body: user_input
+  })
+  return response;
 }
-
-
-
-// Make POST request using fetch
-fetch(api_endpoint, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(user_input)
-})
-.then(response => response.json())  // Parse the JSON from the response
-.then(data => {
-    console.log('Success:', data);   // Handle the response data
-})
-.catch((error) => {
-    console.error('Error:', error);  // Handle any errors
-});
-
 // -------------------- POST
 
 document.addEventListener('DOMContentLoaded', () => { 
   const searchButton = document.getElementById('search_button');
-  
-
   searchButton.addEventListener('click', async (event) => {
     event.preventDefault(); // prevent default form submission
     const url = getURL();
     let data_type = dataTypeSelector();
     console.log("selected dataType value: "+data_type);
-    
-
-    
     console.log("searching... \"" + url + "\"");
-
-    if (await validateURL(url)) {
-      console.log('URL is valid, proceeding...');
-    } else {
-      console.error("Invalid URL");
-    }
-
+    
+    // POST to Flask
+    flask_res = await postToFlask(url, data_type);
   });
 });
 
