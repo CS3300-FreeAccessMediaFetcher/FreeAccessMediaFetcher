@@ -2,7 +2,6 @@ from flask import Flask
 from flask import render_template
 from flask import request
 from scraper_components import web_scraper
-from werkzeug.datastructures import CombinedMultiDict, MultiDict
 
 # GLOBAL VARS#
 HOST_NAME = "localhost"
