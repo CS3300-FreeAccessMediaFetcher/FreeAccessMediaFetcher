@@ -25,7 +25,7 @@ videoCounter = 0
 otherCounter = 0
 dataSet = {}
 dictIndex = 0
-
+validDataTypes = ['web_page', 'text', 'image', 'audio']
 
 class siteObject:
     def __init__(self,dataType,dataName,dataSize,data):
@@ -34,12 +34,6 @@ class siteObject:
         self.dataSize = dataSize
         self.data = data
 
-        
-# INPUT FROM FLASK #
-def webScraperInput(url: str, data_type: str):
-    print("Hello Flask!")
-    return { "StatusCode": 200 }
-
 ###################
 
 def retrieveDictionary():
@@ -47,7 +41,7 @@ def retrieveDictionary():
     localData = dataSet
     return localData
 
-def dataCollection(inc_website : str):
+def dataCollection(inc_website : str, inc_dataType: str):
     lobj_response = requests.get(inc_website)
     if lobj_response.status_code == 200:
         print("Connected to " + inc_website)
@@ -58,18 +52,21 @@ def dataCollection(inc_website : str):
             header.decompose()
         if footer:
             footer.decompose()
-        print(site.prettify())
+        #print(site.prettify())
         print("----------------------------------------------------------------------------------\nBeginning Harvest of site...\n----------------------------------------------------------------------------------")
 
-        collectAllStrings(site)
-        collectAllLinks(site)
-        collectAllImg(site)
+        if inc_dataType == "text":
+            collectAllStrings(site)
+        elif inc_dataType == "web_page":
+            collectAllLinks(site)
+        elif inc_dataType == "image":
+            collectAllImg(site, inc_website)
         # collectAllVideos(site)
     else:
         print("unable to reach site")
 
 
-def collectAllImg(inc_site: BeautifulSoup):
+def collectAllImg(inc_site: BeautifulSoup, inc_input_url: str):
     #One is for counting images in a page
     global imageCounter
     #This one is for labelling images without alt text
@@ -77,15 +74,13 @@ def collectAllImg(inc_site: BeautifulSoup):
     for imgs in inc_site.find_all('img'):
         imageSource = imgs.attrs['src']
         if 'http' not in imageSource and not (imageSource.startswith("//")):
-            imageSource = scraping_site + "/" + imageSource
+            imageSource = inc_input_url + "/" + imageSource
         if imageSource.startswith("//"):
             imageSource = imageSource.replace("//","")
             # imageSource = "https:" + imageSource
         imageName = imgs.get('alt')
         if imageName is None:
             imageName = "Unknown Image " + str(imageNumber)
-        # print(imageSource)
-        # print(imageName)
         dataPoint = siteObject("image",imageName,"0mb",imageSource)
         imageCounter += 1
         imageNumber += 1
@@ -103,16 +98,13 @@ def collectAllVideos(inc_site: BeautifulSoup):
         videoSource = videos.attrs['src']
         videoCounter += 1
         videoNumber += 1
-        print(videoSource)
 
 def collectAllStrings(inc_site: BeautifulSoup):
     global textCounter
     for text in inc_site.find_all(['p','title']):
         for child in text.contents:
-            if child.get_text() == "":
-                print("Blank text")
-            else:    
-                dataPoint = siteObject("text","text","0mb",child.get_text())
+            if child.get_text() != "": 
+                dataPoint = siteObject("text", "text" ,"0mb", child.get_text())
                 textCounter += 1
                 addToDictionary(dataPoint)
             
@@ -124,7 +116,6 @@ def collectAllLinks(inc_site: BeautifulSoup):
         else:
             linkName = "Unlabeled Link"
         link = atags.get("href")
-        # if "http" in link:
         dataPoint = siteObject("link",linkName,"0mb",link)
         linkCounter += 1
         addToDictionary(dataPoint)
@@ -132,7 +123,7 @@ def collectAllLinks(inc_site: BeautifulSoup):
 def addToDictionary(inc_object : siteObject):
     global dataSet
     global dictIndex
-    dataSet[dictIndex] = inc_object
+    dataSet[dictIndex] = { "dataType": inc_object.dataType, "dataSize": inc_object.dataSize, "dataName": inc_object.dataName, "data": inc_object.data } 
     dictIndex += 1
 
 # This will return all data of one type
@@ -141,45 +132,28 @@ def retrieveDataByType(inc_dataType):
     global dataSet
     listOfData = []
     for dataIndex in dataSet:
-        if dataSet[dataIndex].dataType == inc_dataType:
+        if dataSet[dataIndex]["dataType"] == inc_dataType:
             listOfData.append(dataSet[dataIndex])
-    for instance in listOfData:
-        print(instance.dataName, " : ", instance.data)
+    #for instance in listOfData:
+    #    print(instance.dataName, " : ", instance.data)
+    return listOfData
 
 def retrieveDataByName(inc_dataName):
     global dataSet
     for dataIndex in dataSet:
-        if dataSet[dataIndex].dataName == inc_dataName:
+        if dataSet[dataIndex]["dataName"] == inc_dataName:
             instance = dataSet[dataIndex]
             print(instance.dataName, " : ", instance.data)
 
 
-
-
-#The following code is solely for testing
-
-# scraping_site = "https://en.wikipedia.org/wiki/List_of_Testudines_families" #mass testing
-scraping_site = "https://books.toscrape.com" #Image testing
-# scraping_site = "https://www.youtube.com/watch?v=LJHQXmOpkUE" #video testing
-# scraping_site = "http://quotes.toscrape.com" #Text testing
-
-dataCollection(scraping_site)
-
-
-print("",textCounter, "blobs of text collected\n",linkCounter,"links collected\n",imageCounter,"images collected\n",otherCounter,"bits of unkown data collected")
-
-
-
-print(dataSet)
-
-retrievalType = input("Enter if you want type or name:")
-
-if retrievalType == "type":
-# retrieveDataTest = "image"
-    retrieveDataTest = input("Enter the type of data you desire:")
-    retrieveDataByType(retrieveDataTest)
-elif retrievalType == "name":
-    retrieveDataTest = input("Enter the name of the data you desire:")
-    retrieveDataByName(retrieveDataTest)
-else:
-    print("Invalid choice")
+# This function runs after Flask receives the input URL from the frontend
+# INPUT FROM FLASK #
+def webScraperInput(url: str, data_type: str):
+    try:
+        dataCollection(url, data_type)
+        results_list = retrieveDataByType(data_type)
+        print(f"Retrieved {len(results_list)} results of type {data_type} from {url}. Returning to Flask...")
+        return { "StatusCode": 200, "DataList": results_list }
+    except Exception as e:
+        return { "StatusCode": 400, "Error": str(e) }
+ 
