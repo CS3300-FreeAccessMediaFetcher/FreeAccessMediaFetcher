@@ -127,7 +127,7 @@ function getURL(){
 }
 
 // -------------------- POST
-async function postToFlask( url, data_type){
+async function postToFlask(url, data_type){
   api_endpoint = '/web-scrape-submission-handler';
 
   // Setup data to send to Flask
@@ -154,7 +154,11 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("searching... \"" + url + "\"");
     
     // POST to Flask
-    flask_res = await postToFlask(url, data_type);
+    postToFlask(url, data_type).then(function(flask_res) {
+      return flask_res.json()
+    }).then(function(scraped_data) {
+      console.log(scraped_data)
+    })
   });
 });
 

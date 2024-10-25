@@ -1,4 +1,5 @@
 from flask import Flask
+from flask import jsonify
 from flask import render_template
 from flask import request
 from scraper_components import web_scraper
@@ -25,14 +26,21 @@ def about():
 def handleWebScraperInput():
     url = str(request.values["url"])
     data_type = str(request.values["data_type"])
-    res = ""
+    res = {}
 
+    # Run scraping function on backend
     if data_type in web_scraper.validDataTypes:
         res = web_scraper.webScraperInput(url, data_type)
     else:
-        res = f"Got an invalid data type: {data_type}"
-    print(res)
-    return res
+       res = { "Error": f"Got an invalid data type: {data_type}" }
+
+    # Send response as JSON object back to Javascript
+    if "DataList" in res:
+        return jsonify(res["DataList"])
+    elif "Error" in res:
+        return jsonify(res["Error"])
+    else:
+        return {}
 
 
 # Start Flask
