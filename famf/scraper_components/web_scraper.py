@@ -161,30 +161,3 @@ def webScraperInput(url: str, data_type: str):
         return { "StatusCode": 400, "Error": str(e) }
  
 
-#The following code is solely for testing
-
-# scraping_site = "https://en.wikipedia.org/wiki/List_of_Testudines_families" #mass testing
-# scraping_site = "https://books.toscrape.com" #Image testing
-# # scraping_site = "https://www.youtube.com/watch?v=LJHQXmOpkUE" #video testing
-# # scraping_site = "http://quotes.toscrape.com" #Text testing
-
-# dataCollection(scraping_site)
-
-
-# print("",textCounter, "blobs of text collected\n",linkCounter,"links collected\n",imageCounter,"images collected\n",otherCounter,"bits of unkown data collected")
-
-
-
-# # print(dataSet)
-
-# retrievalType = input("Enter if you want type or name:")
-
-# if retrievalType == "type":
-# # retrieveDataTest = "image"
-#     retrieveDataTest = input("Enter the type of data you desire:")
-#     retrieveDataByType(retrieveDataTest)
-# elif retrievalType == "name":
-#     retrieveDataTest = input("Enter the name of the data you desire:")
-#     retrieveDataByName(retrieveDataTest)
-# else:
-#     print("Invalid choice")
