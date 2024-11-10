@@ -1,5 +1,6 @@
 import requests
 import time
+import regex as re
 from bs4 import BeautifulSoup
 
 # headers = {'User-Agent':
@@ -52,7 +53,7 @@ def dataCollection(inc_website : str, inc_dataType: str):
             header.decompose()
         if footer:
             footer.decompose()
-        #print(site.prettify())
+        # print(site.prettify())
         print("----------------------------------------------------------------------------------\nBeginning Harvest of site...\n----------------------------------------------------------------------------------")
 
         if inc_dataType == "text":
@@ -77,7 +78,6 @@ def collectAllImg(inc_site: BeautifulSoup, inc_input_url: str):
             imageSource = inc_input_url + "/" + imageSource
         if imageSource.startswith("//"):
             imageSource = imageSource.replace("//","")
-            # imageSource = "https:" + imageSource
         imageName = imgs.get('alt')
         if imageName is None:
             imageName = "Unknown Image " + str(imageNumber)
@@ -101,10 +101,13 @@ def collectAllVideos(inc_site: BeautifulSoup):
 
 def collectAllStrings(inc_site: BeautifulSoup):
     global textCounter
-    for text in inc_site.find_all(['p','title']):
+    for text in inc_site.find_all(['p','title','a']):
         for child in text.contents:
-            if child.get_text() != "": 
-                dataPoint = siteObject("text", "text" ,"0mb", child.get_text())
+            baseText = child.get_text().strip()
+            baseText = re.sub('\ {2,}', '', baseText)
+            newText = re.sub('\n*', '', baseText)
+            if newText != '':
+                dataPoint = siteObject("text","text","0mb",newText)
                 textCounter += 1
                 addToDictionary(dataPoint)
             
@@ -157,3 +160,4 @@ def webScraperInput(url: str, data_type: str):
     except Exception as e:
         return { "StatusCode": 400, "Error": str(e) }
  
+
