@@ -36,6 +36,7 @@ def handleWebScraperInput():
 
     # Send response as JSON object back to Javascript
     if "DataList" in res:
+        web_scraper.webScraperDictionaryClear()
         return jsonify(res["DataList"])
     elif "Error" in res:
         return jsonify(res["Error"])

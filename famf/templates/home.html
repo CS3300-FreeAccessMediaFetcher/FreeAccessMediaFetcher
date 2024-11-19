@@ -45,39 +45,45 @@
                     <input type="radio" class="retriever" id="text" name="retriever_selection" value="text" />
                     <label>Text Blocks</label><br>
                     
-                    <input type="radio" class="retriever" id="Photos" name="retriever_selection" value="image" />
+                    <input type="radio" class="retriever" id="Photos" name="retriever_selection" value="image" checked /><!-- defalt cheaked box -->
                     <label>Photos</label><br>
                     
                     <input type="radio" class="retriever" id="Audio" name="retriever_selection" value="audio" />
                     <label>Audio</label><br>
                     
-                    <input type="radio" class="retriever" id="Video" name="retriever_selection" value="video" />
-                    <label>Video</label><br>
                     </form>
 
-                    <form>
-                    <input type="radio" class ="Output" id="Video" name="download_type" value="Video" />
+
+                    <form id=" =" download_form>
+                    <input type="radio" class ="download" id="download_raw" name="download_type" value="download" />
                     <label>Download Raw</label>
-                    <input type="radio" class="Output" id="Video" name="download_type" value="Video" />
+                    <input type="radio" id="download_zip" name="download_type" value="download"  class="download" checked />
                     <label>Download as Zip</label>
                     </form>
+
+
                 </div>
             </form>
         </div>
 
         <!-- Table on the right -->
         <section id="output">
-            <table id="output_table">
+
+            <table id= "controls">
                 <thead>
                     <tr id="controll_panel" class="control">
                         <th class="control"><button type="button" class="button" id="Select_All">Select All</button></th>
                         <th class="control"><button type="button" class="button" id="Deselect_All">Deselect All</button></th>
                         <th class="control"><button type="button" class="button" id="Remove">Remove</button></th>
                         <th class="control"><button type="button" class="button" id="Remove_All">Remove All</button></th>
-                        <th class="control"><button type="button" class="button" id="Download">Download</button></th>
-                        <th class="control"><button type="button" class="button" id="Download_All">Download All</button></th>
+                        <th class="control"><button type="button" class="button" id="Download" >Download </button></th>
                     </tr>
                 </thead>
+                </table>
+
+
+
+                <table id="output_table">
                 <thead>
                     <tr>
                         <th>Type</th>

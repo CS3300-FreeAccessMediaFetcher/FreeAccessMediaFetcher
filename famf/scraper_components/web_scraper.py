@@ -104,7 +104,7 @@ def collectAllStrings(inc_site: BeautifulSoup):
     for text in inc_site.find_all(['p','title','a']):
         for child in text.contents:
             baseText = child.get_text().strip()
-            baseText = re.sub('\ {2,}', '', baseText)
+            #baseText = re.sub('\ {2,}', '', baseText)
             newText = re.sub('\n*', '', baseText)
             if newText != '':
                 dataPoint = siteObject("text","text","0mb",newText)
@@ -161,3 +161,5 @@ def webScraperInput(url: str, data_type: str):
         return { "StatusCode": 400, "Error": str(e) }
  
 
+def webScraperDictionaryClear():
+    dataSet.clear()

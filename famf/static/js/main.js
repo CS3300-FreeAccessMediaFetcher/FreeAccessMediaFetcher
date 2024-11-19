@@ -1,6 +1,8 @@
+const localhost = 'http://localhost:3000/'
+
 function formatLink(link) {
 
-    // Ensure link is properly formatted 
+    // link starts with "https://"" 
     if (!link.startsWith("https://")) {
         return "https://" + link;
     }
@@ -69,6 +71,12 @@ function addElementTable(type, name, size, data, checked = true, preview) {
 
         previewCell.appendChild(img);
     }
+
+    if (type === "text") {
+        const p = document.createElement("p");
+        p.innerText = data;
+        previewCell.appendChild(p)
+    }
     
     // Append cells to the new row
     newRow.appendChild(typeCell);
@@ -102,6 +110,60 @@ document.getElementById("Remove").addEventListener("click", function (event) {
         removeRowFromTable();
     });
 
+
+
+function returnAllData() {
+    const tableBody = document.querySelector("#output_table tbody"); // Select the table body by ID
+    var selectedData = []; // array to keet the data.
+    var count = 0; // creata a counter for the number of items 
+    tableBody.querySelectorAll("tr").forEach(row => { // For each row in the table
+
+        const checkbox = row.querySelector("input[type='checkbox']");
+        const rowData = {
+            //count = count+1; // iterate the counter.
+            // take all atubrutes of the data and place them in to an array 
+            type: row.cells[0].innerText,
+            name: row.cells[1].innerText,
+            size: row.cells[2].innerText,
+            link: row.cells[3].innerText
+        };
+        count = count + 1;
+        selectedData.push(rowData);
+    });
+
+    if (count == 0) { return null }
+    else { return selectedData; }
+}
+
+document.getElementById("Download").addEventListener("click", function (event) {
+    // selects the element with .Remove id and adds an on click event to it. for the function :removeRowFromTable()
+    event.preventDefault(); 
+    // download selection by tag "download_raw"/"download_zip"
+    const download_raw = document.getElementById("download_raw");
+    const download_zip = document.getElementById("download_zip");
+    // gather all data
+    const selected_data = returnAllData();
+    console.log("creating a download request.");
+    // if the dataa is not null create a post request :
+    if (selected_data != null) {
+
+        if (download_raw.checked) {
+            //POST download raw
+            console.log("sending post request for download_raw");
+            sendDownloadRequestToFlask("download_raw", selected_data);
+
+        } else if (download_zip.checked) {
+            //POST download zip
+            console.log("sending post request for download_zip");
+            sendDownloadRequestToFlask("download_zip", selected_data);
+        } else {
+            // idf there is no selection in the radio selections for download 
+            console.log("unknown error -  radio selection (download zip/raw)")
+        }
+    } else {
+        // if there are no data to push to a post request 
+    console.log("no data avaible to post")}
+});
 
 function clearTable() {
     // remove all elements from table
@@ -149,9 +211,11 @@ function getURL() {
     return url;
 }
 
+
+
 // -------------------- POST
 async function sendPostRequestToFlask(url, dataType) {
-    const apiEndpoint = 'http://localhost:3000/';
+    const apiEndpoint = localhost;
     const route = 'web-scrape-submission-handler';
 
     // Create FormData to send to Flask
@@ -160,6 +224,42 @@ async function sendPostRequestToFlask(url, dataType) {
     formData.append("data_type", dataType);
 
     // Send POST request to Flask
+    try {
+        const response = await fetch(apiEndpoint + route, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data;
+        } else {
+            console.error("Server returned error:", response.status);
+        }
+    } catch (error) {
+        console.error("Fetch request failed:", error);
+    }
+}
+
+async function sendDownloadRequestToFlask(Download_type, data) {
+    const apiEndpoint = localhost;
+    const zip_route = 'download-manager-zip';
+    const raw_route = 'download-manager-raw';
+    var route = ""
+
+    //select downloadtype by id corrasoponding to radio button 
+    if (Download_type === "download_zip") {
+        route = zip_route;
+
+    } else if (Download_type === "download_raw") {
+        route = raw_route;
+    }
+
+    // Create FormData to send to Flask
+    const formData = new FormData();
+    formData.append("download_type", Download_type);
+    formData.append("data", data);
+
     try {
         const response = await fetch(apiEndpoint + route, {
             method: 'POST',

@@ -1,5 +1,5 @@
 # FreeAccessMediaFetcher
-Github repository housing code and dependencies for UCCS CS3300 software engineering project "Free Access Media Fetcher"
+Github repository housing code and dependencies for UCCS CS3300 software engineering project "Free Access Media Fetcher."
 
 ## DEBUG - Running App Locally
 Follow these steps to start the app for local debugging:
