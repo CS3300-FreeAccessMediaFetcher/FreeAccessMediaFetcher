@@ -159,7 +159,9 @@ def webScraperInput(url: str, data_type: str):
         return { "StatusCode": 200, "DataList": results_list }
     except Exception as e:
         return { "StatusCode": 400, "Error": str(e) }
- 
+    
+def downloadData(download_type: str, data: list):
+    print(download_type, data)
 
 def webScraperDictionaryClear():
     dataSet.clear()

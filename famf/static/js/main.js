@@ -118,15 +118,22 @@ function returnAllData() {
     var count = 0; // creata a counter for the number of items 
     tableBody.querySelectorAll("tr").forEach(row => { // For each row in the table
 
-        const checkbox = row.querySelector("input[type='checkbox']");
-        const rowData = {
-            //count = count+1; // iterate the counter.
-            // take all atubrutes of the data and place them in to an array 
-            type: row.cells[0].innerText,
-            name: row.cells[1].innerText,
-            size: row.cells[2].innerText,
-            link: row.cells[3].innerText
+        const rowType = row.cells[0].innerText
+        const rowName = row.cells[1].innerText 
+        const rowSize = row.cells[2].innerText
+        var rowData = {
+            // take all attributes of the data and place them in to an array 
+            type: rowType,
+            name: rowName,
+            size: rowSize
         };
+
+        // For images, add the link to the image. For text, we just need the text itself
+        if (rowType == "image") {
+            rowData["link"] = row.querySelector("a").getAttribute("href")
+        } else if (rowType == "text") {
+            rowData["text"] = row.cells[5].innerText
+        }
         count = count + 1;
         selectedData.push(rowData);
     });
@@ -162,7 +169,8 @@ document.getElementById("Download").addEventListener("click", function (event) {
         }
     } else {
         // if there are no data to push to a post request 
-    console.log("no data avaible to post")}
+        console.log("no data avaible to post")
+    }
 });
 
 function clearTable() {
@@ -241,29 +249,20 @@ async function sendPostRequestToFlask(url, dataType) {
     }
 }
 
-async function sendDownloadRequestToFlask(Download_type, data) {
+async function sendDownloadRequestToFlask(download_type, data) {
     const apiEndpoint = localhost;
-    const zip_route = 'download-manager-zip';
-    const raw_route = 'download-manager-raw';
-    var route = ""
-
-    //select downloadtype by id corrasoponding to radio button 
-    if (Download_type === "download_zip") {
-        route = zip_route;
-
-    } else if (Download_type === "download_raw") {
-        route = raw_route;
-    }
+    const route = 'download-handler';
 
     // Create FormData to send to Flask
-    const formData = new FormData();
-    formData.append("download_type", Download_type);
-    formData.append("data", data);
+    var postData = {}
+    postData["data"] = data
+    postData["download_type"] = download_type
 
     try {
         const response = await fetch(apiEndpoint + route, {
             method: 'POST',
-            body: formData
+            body: JSON.stringify(postData),
+            headers: { "Content-Type": "application/json" }
         });
 
         if (response.ok) {
