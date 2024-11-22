@@ -1,23 +1,224 @@
-const localhost = 'http://localhost:3000/'
+const flaskEndpoint = 'http://localhost:3000/'
 
+// UTILITY FUnCTIONS //
 function formatLink(link) {
 
-    // link starts with "https://"" 
     if (!link.startsWith("https://")) {
         return "https://" + link;
     }
     return link;
 }
 
+function getDataType() {
+    const radios = document.getElementsByClassName('retriever');
+    for (let i = 0; i < radios.length; i++) {
+        if (radios[i].checked) {
+            return radios[i].value;
+        }
+    }
+    return null;
+}
 
-// Add  to the table 
-function addElementTable(type, name, size, data, checked = true, preview) {
+function getURL() {
+    const url = document.getElementById('url_search').value;
+    return url;
+}
+// END UTILITY FUNCTIONS //
 
-    // Get the table body
+// BUTTON HANDLERS //
+// Select or Deselect all elements in table
+function selectAllRows(should_select) {
     const tableBody = document.querySelector("#output_table tbody");
+    tableBody.querySelectorAll("tr").forEach(row => { 
+        const checkbox = row.querySelector("input[type='checkbox']"); 
+        if (checkbox) { 
+            checkbox.checked = should_select;
+        }
+    });
+}
 
-    // Create a new row
-    const newRow = document.createElement("tr");
+document.getElementById("Deselect_All").addEventListener("click", function (event) {
+    event.preventDefault();
+    selectAllRows(false);
+});
+document.getElementById("Select_All").addEventListener("click", function (event) {
+    event.preventDefault();
+    selectAllRows(true);
+});
+
+// Remove selected rows 
+function removeRowFromTable() {
+    const tableBody = document.querySelector("#output_table tbody"); // Select the table body by ID
+    tableBody.querySelectorAll("tr").forEach(row => { // For each row in the table
+        const checkbox = row.querySelector("input[type='checkbox']"); // Selects checkbox in the row
+        if (checkbox && checkbox.checked) { // If checkbox is checked
+            row.remove(); // Removes the row from the table
+        }
+    });
+}
+
+// Remove all rows
+function removeAllRowsFromTable() {
+    // remove all elements from table
+    const tableBody = document.querySelector("#output_table tbody");
+    tableBody.innerHTML = ""; // Clears all rows in the table
+}
+
+document.getElementById("Remove").addEventListener("click", function (event) {
+    event.preventDefault();
+    removeRowFromTable();
+});
+document.getElementById("Remove_All").addEventListener("click", function (event) {
+    event.preventDefault(); 
+    removeAllRowsFromTable();
+});
+
+// Download selected data
+function returnSelectedData() {
+    const tableBody = document.querySelector("#output_table tbody"); // Select the table body by ID
+    var selectedData = []; 
+    var count = 0;
+    tableBody.querySelectorAll("tr").forEach(row => {
+        const checkbox = row.querySelector("input[type='checkbox']"); 
+        if (checkbox && checkbox.checked) { // Only return checked rows
+            const rowType = row.cells[0].innerText
+            const rowName = row.cells[1].innerText 
+            const rowSize = row.cells[2].innerText
+            var rowData = {
+                // Take all attributes of the data and place them in to an array 
+                type: rowType,
+                name: rowName,
+                size: rowSize
+            };
+    
+            // For images, add the link to the image. For text, we just need the text itself
+            if (rowType == "image") {
+                rowData["link"] = row.querySelector("a").getAttribute("href")
+            } else if (rowType == "text") {
+                rowData["text"] = row.cells[5].innerText
+            }
+            count = count + 1;
+            selectedData.push(rowData);
+        }
+    });
+
+    if (count == 0) { return null }
+    else { return selectedData; }
+}
+
+document.getElementById("download_raw").addEventListener("click", function (event) {
+    event.preventDefault(); 
+    const selected_data = returnSelectedData();
+    if (selected_data != null) {
+        console.log("sending post request for download_raw");
+        sendDownloadRequestToFlask("download_raw", selected_data);
+    } else {
+        alert("Please select at least one data element to download")
+    }
+});
+document.getElementById("download_zip").addEventListener("click", function (event) {
+    event.preventDefault(); 
+    const selected_data = returnSelectedData();
+    if (selected_data != null) {
+        console.log("sending post request for download_raw");
+        sendDownloadRequestToFlask("download_zip", selected_data);
+    } else {
+        alert("Please select at least one data element to download")
+    }
+});
+
+
+
+
+// -------------------- POST REQUESTS TO FLASK
+async function sendPostRequestToFlask(url, dataType) {
+    const route = 'web-scrape-submission-handler';
+
+    // Create FormData to send to Flask
+    const formData = new FormData();
+    formData.append("url", url);
+    formData.append("data_type", dataType);
+
+    // Send POST request to Flask
+    try {
+        const response = await fetch(flaskEndpoint + route, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data;
+        } else {
+            console.error("Server returned error:", response.status);
+        }
+    } catch (error) {
+        console.error("Fetch request failed:", error);
+    }
+}
+
+async function sendDownloadRequestToFlask(download_type, data) {
+    const route = 'download-handler';
+
+    // Create FormData to send to Flask
+    var postData = {}
+    postData["data"] = data
+    postData["download_type"] = download_type
+
+    try {
+        const response = await fetch(flaskEndpoint + route, {
+            method: 'POST',
+            body: JSON.stringify(postData),
+            headers: { "Content-Type": "application/json" }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data;
+        } else {
+            console.error("Server returned error:", response.status);
+        }
+    } catch (error) {
+        console.error("Fetch request failed:", error);
+    }
+}
+// -------------------- END POST REQUESTS
+
+// SEARCH HANDLING //
+document.addEventListener('DOMContentLoaded', () => {
+    const searchButton = document.getElementById('search_button');
+
+    searchButton.addEventListener('click', async (event) => {
+        event.preventDefault(); // Prevent default form submission
+
+        const url = getURL();
+        const dataType = getDataType();
+
+        console.log(`Selected data type: ${dataType}`);
+        console.log(`Searching... "${url}"`);
+
+        // Send POST request to Flask
+        sendPostRequestToFlask(url, dataType).then(scrapedData => {
+            if (typeof(scrapedData) == "object") {
+                console.log("Scraped data:", scrapedData);
+
+                for (let i = 0; i < scrapedData.length; i++){
+                    item = scrapedData[i]
+                    addElementToTable(item.dataType, item.dataName, item.dataSize, item.data, true, item.data);
+                }
+            }
+            else {
+                alert("Search failed! Please check URL is valid and try again.")
+            }
+        });
+    });
+});
+
+// Add to the table 
+function addElementToTable(type, name, size, data, checked = true, preview) {
+
+    const tableBody = document.querySelector("#output_table tbody"); // Get the table body
+    const newRow = document.createElement("tr"); // Create a new row
 
     // Create cells for Type, Name, Size, Link, Selected, and Preview
     const typeCell = document.createElement("td");
@@ -35,7 +236,6 @@ function addElementTable(type, name, size, data, checked = true, preview) {
     var formattedLink = formatLink(data)
     const linkCell = document.createElement("td");
 
-
     // Create the anchor element for the link
     const anchor = document.createElement("a"); // Make sure `anchor` is declared
     anchor.href = formattedLink; // The source of the content 
@@ -43,25 +243,17 @@ function addElementTable(type, name, size, data, checked = true, preview) {
     anchor.target = "_blank"; // Open in a new tab
     linkCell.appendChild(anchor);
 
-
     // Selected cell with a checkbox
     const selectedCell = document.createElement("td");
     const checkbox = document.createElement("input");
+    checkbox.type = "checkbox"; // Create a checkbox of type "checkbox"
+    checkbox.checked = checked; // Make it checked by default
+    selectedCell.appendChild(checkbox); // Append checkbox
 
-    // Create a checkbox of type "checkbox"
-    checkbox.type = "checkbox";
-    // Make it checked by default
-    checkbox.checked = checked;
-    // Append checkbox
-    selectedCell.appendChild(checkbox);
-
-    // Preview cell
-    // Create a cell in the table 
+    // Create a preview cell in the table 
     const previewCell = document.createElement("td");
-    // Create the text cell representing the preview
-
     if (type === "image") {
-        //EXAMPLE <img src="img_girl.jpg" alt="Girl in a jacket" width="500" height="600">
+        // EXAMPLE <img src="img_girl.jpg" alt="Girl in a jacket" width="500" height="600">
         const img = document.createElement("img");
 
         img.src = formattedLink;
@@ -71,8 +263,7 @@ function addElementTable(type, name, size, data, checked = true, preview) {
 
         previewCell.appendChild(img);
     }
-
-    if (type === "text") {
+    else if (type === "text") {
         const p = document.createElement("p");
         p.innerText = data;
         previewCell.appendChild(p)
@@ -90,214 +281,3 @@ function addElementTable(type, name, size, data, checked = true, preview) {
     tableBody.appendChild(newRow);
     console.log(name + " added to table.");
 }
-
-
-// Remove selected elements from the table
-function removeRowFromTable() {
-    const tableBody = document.querySelector("#output_table tbody"); // Select the table body by ID
-    tableBody.querySelectorAll("tr").forEach(row => { // For each row in the table
-        const checkbox = row.querySelector("input[type='checkbox']"); // Selects checkbox in the row
-        if (checkbox && checkbox.checked) { // If checkbox is checked
-            row.remove(); // Removes the row from the table
-        }
-    });
-}
-
-// removes only checked boxes 
-document.getElementById("Remove").addEventListener("click", function (event) {
-    // selects the element with .Remove id and adds an on click event to it. for the function :removeRowFromTable()
-        event.preventDefault();
-        removeRowFromTable();
-    });
-
-
-
-function returnAllData() {
-    const tableBody = document.querySelector("#output_table tbody"); // Select the table body by ID
-    var selectedData = []; // array to keet the data.
-    var count = 0; // creata a counter for the number of items 
-    tableBody.querySelectorAll("tr").forEach(row => { // For each row in the table
-
-        const rowType = row.cells[0].innerText
-        const rowName = row.cells[1].innerText 
-        const rowSize = row.cells[2].innerText
-        var rowData = {
-            // take all attributes of the data and place them in to an array 
-            type: rowType,
-            name: rowName,
-            size: rowSize
-        };
-
-        // For images, add the link to the image. For text, we just need the text itself
-        if (rowType == "image") {
-            rowData["link"] = row.querySelector("a").getAttribute("href")
-        } else if (rowType == "text") {
-            rowData["text"] = row.cells[5].innerText
-        }
-        count = count + 1;
-        selectedData.push(rowData);
-    });
-
-    if (count == 0) { return null }
-    else { return selectedData; }
-}
-
-document.getElementById("Download").addEventListener("click", function (event) {
-    // selects the element with .Remove id and adds an on click event to it. for the function :removeRowFromTable()
-    event.preventDefault(); 
-    // download selection by tag "download_raw"/"download_zip"
-    const download_raw = document.getElementById("download_raw");
-    const download_zip = document.getElementById("download_zip");
-    // gather all data
-    const selected_data = returnAllData();
-    console.log("creating a download request.");
-    // if the dataa is not null create a post request :
-    if (selected_data != null) {
-
-        if (download_raw.checked) {
-            //POST download raw
-            console.log("sending post request for download_raw");
-            sendDownloadRequestToFlask("download_raw", selected_data);
-
-        } else if (download_zip.checked) {
-            //POST download zip
-            console.log("sending post request for download_zip");
-            sendDownloadRequestToFlask("download_zip", selected_data);
-        } else {
-            // idf there is no selection in the radio selections for download 
-            console.log("unknown error -  radio selection (download zip/raw)")
-        }
-    } else {
-        // if there are no data to push to a post request 
-        console.log("no data avaible to post")
-    }
-});
-
-function clearTable() {
-    // remove all elements from table
-    const tableBody = document.querySelector("#output_table tbody");
-    tableBody.innerHTML = ""; // Clears all rows in the table
-}
-
-// event listener to remove all cells from the table.
-document.getElementById("Remove_All").addEventListener("click", function (event) {
-    event.preventDefault(); 
-    clearTable();
-});
-
-
-
-const form = document.querySelector("form");
-const log = document.querySelector("#log");
-
-form.addEventListener(
-    "submit",
-    (event) => {
-        const data = new FormData(form);
-        let output = "";
-        for (const entry of data) {
-            output = `${output}${entry[0]}=${entry[1]}\r`;
-        }
-        log.innerText = output;
-        event.preventDefault();
-    },
-    false,
-);
-
-function dataTypeSelector() {
-    const radios = document.getElementsByClassName('retriever');
-    for (let i = 0; i < radios.length; i++) {
-        if (radios[i].checked) {
-            return radios[i].value;
-        }
-    }
-    return null;
-}
-
-function getURL() {
-    const url = document.getElementById('url_search').value;
-    return url;
-}
-
-
-
-// -------------------- POST
-async function sendPostRequestToFlask(url, dataType) {
-    const apiEndpoint = localhost;
-    const route = 'web-scrape-submission-handler';
-
-    // Create FormData to send to Flask
-    const formData = new FormData();
-    formData.append("url", url);
-    formData.append("data_type", dataType);
-
-    // Send POST request to Flask
-    try {
-        const response = await fetch(apiEndpoint + route, {
-            method: 'POST',
-            body: formData
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            return data;
-        } else {
-            console.error("Server returned error:", response.status);
-        }
-    } catch (error) {
-        console.error("Fetch request failed:", error);
-    }
-}
-
-async function sendDownloadRequestToFlask(download_type, data) {
-    const apiEndpoint = localhost;
-    const route = 'download-handler';
-
-    // Create FormData to send to Flask
-    var postData = {}
-    postData["data"] = data
-    postData["download_type"] = download_type
-
-    try {
-        const response = await fetch(apiEndpoint + route, {
-            method: 'POST',
-            body: JSON.stringify(postData),
-            headers: { "Content-Type": "application/json" }
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            return data;
-        } else {
-            console.error("Server returned error:", response.status);
-        }
-    } catch (error) {
-        console.error("Fetch request failed:", error);
-    }
-}
-// -------------------- END POST
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    const searchButton = document.getElementById('search_button');
-
-    searchButton.addEventListener('click', async (event) => {
-        event.preventDefault(); // Prevent default form submission
-
-        const url = getURL();
-        const dataType = dataTypeSelector();
-
-        console.log(`Selected data type: ${dataType}`);
-        console.log(`Searching... "${url}"`);
-
-        // Send POST request to Flask
-        sendPostRequestToFlask(url, dataType).then(scrapedData => {
-            console.log("Scraped data:", scrapedData);
-
-            for (let i = 0; i < scrapedData.length; i++){
-                item = scrapedData[i]
-                addElementTable(item.dataType,item.dataName, item.dataSize, item.data, true, item.data);
-            }
-        });
-    });
-});

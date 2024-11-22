@@ -29,39 +29,25 @@
     <section class="s1">
         <!-- Form on the left -->
         <div class="form-container">
-            <form class="form" id="GOLDEN RETRIEVER">
-                <a id="formTitle"><h3>GOLDEN RETRIEVER</h3></a>
-                <label for="url">URL:<a class="eg"></a> </label><br /><br />
-                <input type="text" class="retriever" id="url_search" name="user_input_url" value="https://en.wikipedia.org/wiki/Main_Page" />
-                <input type="submit" value="Search" id="search_button" class="scraper" /><br /><br />
+            <form class="form-main" id="GOLDEN RETRIEVER">
+                <a id="form-title"><h3>MEDIA FETCHER</h3></a>
+                <label for="url"><b>URL:</b><a class="eg"></a></label>
+                <input type="text" class="retriever" id="url_search" name="user_input_url" value="https://w3schools.com" />
+                <input type="submit" value="Search" id="search_button" class="scraper" /><br />
      
                 <!-- Filter Box -->
                 <div class="filter-box">
-                    <h4>Selection</h4>
+                    <h4>Data Type Selection</h4>
                     <form>
                     <input type="radio" class="retriever" id="webpage" name="retriever_selection" value="web_page" />
-                    <label> Web Page</label><br>
+                    <label>Web Page</label><br>
                     
                     <input type="radio" class="retriever" id="text" name="retriever_selection" value="text" />
                     <label>Text Blocks</label><br>
                     
-                    <input type="radio" class="retriever" id="Photos" name="retriever_selection" value="image" checked /><!-- defalt cheaked box -->
-                    <label>Photos</label><br>
-                    
-                    <input type="radio" class="retriever" id="Audio" name="retriever_selection" value="audio" />
-                    <label>Audio</label><br>
-                    
+                    <input type="radio" class="retriever" id="Photos" name="retriever_selection" value="image" checked /><!-- defalt checked box -->
+                    <label>Photos</label><br>    
                     </form>
-
-
-                    <form id=" =" download_form>
-                    <input type="radio" class ="download" id="download_raw" name="download_type" value="download" />
-                    <label>Download Raw</label>
-                    <input type="radio" id="download_zip" name="download_type" value="download"  class="download" checked />
-                    <label>Download as Zip</label>
-                    </form>
-
-
                 </div>
             </form>
         </div>
@@ -76,7 +62,8 @@
                         <th class="control"><button type="button" class="button" id="Deselect_All">Deselect All</button></th>
                         <th class="control"><button type="button" class="button" id="Remove">Remove</button></th>
                         <th class="control"><button type="button" class="button" id="Remove_All">Remove All</button></th>
-                        <th class="control"><button type="button" class="button" id="Download" >Download </button></th>
+                        <th class="control"><button type="button" class="button" id="download_raw">Download Raw</button></th>
+                        <th class="control"><button type="button" class="button" id="download_zip">Download Zip</button></th>
                     </tr>
                 </thead>
                 </table>

@@ -51,22 +51,27 @@
     }
     
     .s1 {
+        margin: auto;
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
         align-items: flex-start;
         width: 100%;
     }
-    
+
     .form-container {
         flex: 1;
         padding-right: 20px;
     }
+
+    .form-main {
+        padding: 10px;
+        border: 1px solid black;
+        min-width: 203px;
+    }
     
     .filter-box {
         background-color: #ddd;
-        padding: 10px;
-        border-radius: 5px;
+        padding-left: 10px;
     }
     
     #output {
@@ -118,11 +123,6 @@
         height: 3em;
         display: inline-block;
         margin-right: 5px; /* Adds space between buttons */
-    }
-    
-    form {
-        border: 1px solid black;
-        min-width: 203px;
     }
     
     section#output {
