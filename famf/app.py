@@ -4,7 +4,7 @@ from flask import render_template
 from flask import request
 from scraper_components import web_scraper
 
-# GLOBAL VARS#
+# GLOBAL VARS #
 HOST_NAME = "localhost"
 LOCAL_PORT = 3000
 
@@ -26,6 +26,8 @@ def about():
 @app.route('/web-scrape-submission-handler', methods=['POST'])
 def handleWebScraperInput():
     try:
+
+        # Retrieve data POSTed from frontend as strings
         url = str(request.values["url"])
         data_type = str(request.values["data_type"])
         res = {}
@@ -52,6 +54,8 @@ def handleWebScraperInput():
 @app.route('/download-handler', methods=['POST'])
 def handleDownloadRaw():
     try:
+
+        # Retrieve data POSTed from frontend as a dictionary
         request_data = request.get_json()
         download_type = request_data["download_type"]
         data = request_data["data"]

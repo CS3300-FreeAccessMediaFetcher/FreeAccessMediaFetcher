@@ -1,14 +1,15 @@
 const flaskEndpoint = 'http://localhost:3000/'
 
-// UTILITY FUnCTIONS //
+// UTILITY FUNCTIONS -------------------- 
+// formatLink() - Ensure link starts with "https://"
 function formatLink(link) {
-
     if (!link.startsWith("https://")) {
         return "https://" + link;
     }
     return link;
 }
 
+// getDataType() - Return value of the checked Data Selection Type radio button
 function getDataType() {
     const radios = document.getElementsByClassName('retriever');
     for (let i = 0; i < radios.length; i++) {
@@ -19,29 +20,29 @@ function getDataType() {
     return null;
 }
 
+// getURL() - Return the user-inputted URL
 function getURL() {
     const url = document.getElementById('url_search').value;
     return url;
 }
-// END UTILITY FUNCTIONS //
+// -------------------- END UTILITY FUNCTIONS
 
-// BUTTON HANDLERS //
+
+// BUTTON HANDLERS --------------------
 // Select or Deselect all elements in table
 function selectAllRows(should_select) {
     const tableBody = document.querySelector("#output_table tbody");
     tableBody.querySelectorAll("tr").forEach(row => { 
+        // For each row, query for checkbox and select/deselect it
         const checkbox = row.querySelector("input[type='checkbox']"); 
-        if (checkbox) { 
-            checkbox.checked = should_select;
-        }
+        if (checkbox) { checkbox.checked = should_select; }
     });
 }
-
-document.getElementById("Deselect_All").addEventListener("click", function (event) {
+document.getElementById("Deselect_All").addEventListener("click", function (event) { // Deselect All Button handler
     event.preventDefault();
     selectAllRows(false);
 });
-document.getElementById("Select_All").addEventListener("click", function (event) {
+document.getElementById("Select_All").addEventListener("click", function (event) { // Select All Button handler
     event.preventDefault();
     selectAllRows(true);
 });
@@ -49,26 +50,25 @@ document.getElementById("Select_All").addEventListener("click", function (event)
 // Remove selected rows 
 function removeRowFromTable() {
     const tableBody = document.querySelector("#output_table tbody"); // Select the table body by ID
-    tableBody.querySelectorAll("tr").forEach(row => { // For each row in the table
-        const checkbox = row.querySelector("input[type='checkbox']"); // Selects checkbox in the row
-        if (checkbox && checkbox.checked) { // If checkbox is checked
-            row.remove(); // Removes the row from the table
+    tableBody.querySelectorAll("tr").forEach(row => { 
+        // For each row in the table, query for checkbox and if it is checked, remove the row
+        const checkbox = row.querySelector("input[type='checkbox']");
+        if (checkbox && checkbox.checked) {
+            row.remove();
         }
     });
 }
 
 // Remove all rows
 function removeAllRowsFromTable() {
-    // remove all elements from table
     const tableBody = document.querySelector("#output_table tbody");
     tableBody.innerHTML = ""; // Clears all rows in the table
 }
-
-document.getElementById("Remove").addEventListener("click", function (event) {
+document.getElementById("Remove").addEventListener("click", function (event) { // Remove Button handler
     event.preventDefault();
     removeRowFromTable();
 });
-document.getElementById("Remove_All").addEventListener("click", function (event) {
+document.getElementById("Remove_All").addEventListener("click", function (event) { // Remove All Button handler
     event.preventDefault(); 
     removeAllRowsFromTable();
 });
@@ -106,28 +106,27 @@ function returnSelectedData() {
     else { return selectedData; }
 }
 
-document.getElementById("download_raw").addEventListener("click", function (event) {
+document.getElementById("download_raw").addEventListener("click", function (event) { // Download Raw Button handler
     event.preventDefault(); 
     const selected_data = returnSelectedData();
     if (selected_data != null) {
-        console.log("sending post request for download_raw");
         sendDownloadRequestToFlask("download_raw", selected_data);
-    } else {
+    } 
+    else {
         alert("Please select at least one data element to download")
     }
 });
-document.getElementById("download_zip").addEventListener("click", function (event) {
+document.getElementById("download_zip").addEventListener("click", function (event) { // Download Zip Button handler
     event.preventDefault(); 
     const selected_data = returnSelectedData();
     if (selected_data != null) {
-        console.log("sending post request for download_raw");
         sendDownloadRequestToFlask("download_zip", selected_data);
-    } else {
+    } 
+    else {
         alert("Please select at least one data element to download")
     }
 });
-
-
+// -------------------- END BUTTON HANDLERS
 
 
 // -------------------- POST REQUESTS TO FLASK
@@ -139,7 +138,7 @@ async function sendPostRequestToFlask(url, dataType) {
     formData.append("url", url);
     formData.append("data_type", dataType);
 
-    // Send POST request to Flask
+    // Send POST request to Flask containing user-inputted URL
     try {
         const response = await fetch(flaskEndpoint + route, {
             method: 'POST',
@@ -160,11 +159,12 @@ async function sendPostRequestToFlask(url, dataType) {
 async function sendDownloadRequestToFlask(download_type, data) {
     const route = 'download-handler';
 
-    // Create FormData to send to Flask
+    // Create JSON data to send to Flask
     var postData = {}
     postData["data"] = data
     postData["download_type"] = download_type
 
+    // Send POST request to Flask containing user-selected data from table and download type (raw or zip)
     try {
         const response = await fetch(flaskEndpoint + route, {
             method: 'POST',
@@ -184,7 +184,8 @@ async function sendDownloadRequestToFlask(download_type, data) {
 }
 // -------------------- END POST REQUESTS
 
-// SEARCH HANDLING //
+
+// SEARCH HANDLING (SUBMIT BUTTON) //
 document.addEventListener('DOMContentLoaded', () => {
     const searchButton = document.getElementById('search_button');
 
@@ -214,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Add to the table 
+// Add row to the table 
 function addElementToTable(type, name, size, data, checked = true, preview) {
 
     const tableBody = document.querySelector("#output_table tbody"); // Get the table body
