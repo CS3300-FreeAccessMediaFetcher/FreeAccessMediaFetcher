@@ -11,6 +11,11 @@ Follow these steps to install and run the application locally:
   - **python3 app.py**
 - Open a web browser and navigate to **localhost:3000**
 
+## Basic Usage
+1. Enter the URL of the site you wish to scrape into the URL input field on the Home page.
+2. Select the type of data you would like to scrape and then click the "Search" button. The table on the right side of the page will be populated with all results that were found.
+3. Select the data you wish to download from the table of results and click the "Download" button above the table to download it to your local machine.
+
 ## Developer Documentation
 Free Access Media Fetcher is separated into three main components: **Web Scraper (Backend)**, **Web-Based UI (Frontend)**, and **Flask (API)**. 
 
@@ -35,8 +40,3 @@ To add a new page, one simply needs to place the HTML file in the "templates" di
 The Flask Python library serves as an interface between the Frontend and Backend. Flask logic is started and contained entirely within "app.py", which is the entrypoint for this application. It runs on localhost:3000 by default. The port can easily be adjusted by changing the value of the "LOCAL_PORT" variable.
 
 With Flask, we create several routes to handle serving up our web pages (or "templates" in Flask terminology) and a couple of other routes to handle POST requests. Flask allows us to handle these requests using native Python code, which makes it a great choice for working with a Python-based backend.
-
-## Usage
-1. Enter the URL of the site you wish to scrape into the URL input field on the Home page.
-2. Select the type of data you would like to scrape and then click the "Search" button. The table on the right side of the page will be populated with all results that were found.
-3. Select the data you wish to download from the table of results and click the "Download" button above the table to download it to your local machine.
