@@ -1,22 +1,24 @@
 import requests
 import regex as re
+from urllib.parse import urlsplit
+from urllib.robotparser import RobotFileParser
 from bs4 import BeautifulSoup
 
-# headers = {'User-Agent':
-#             'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36',
-#             'Accept-Language': 'en-US, en;q=0.5'}
-# headers = {'accept':'*/*',
-# 'accept-encoding':'gzip, deflate, br',
-# 'accept-language':'en-GB,en;q=0.9,en-US;q=0.8,hi;q=0.7,la;q=0.6',
-# 'cache-control':'no-cache',
-# 'dnt':'1',
-# 'pragma':'no-cache',
-# 'referer':'https',
-# 'sec-fetch-mode':'no-cors',
-# 'sec-fetch-site':'cross-site',
-# 'user-agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36',}
+
+
 
 # Global Variables
+
+headers = {'accept':'*/*',
+'accept-encoding':'gzip, deflate, br',
+'accept-language':'en-GB,en;q=0.9,en-US;q=0.8,hi;q=0.7,la;q=0.6',
+'cache-control':'no-cache',
+'dnt':'1',
+'pragma':'no-cache',
+'referer':'https',
+'sec-fetch-mode':'no-cors',
+'sec-fetch-site':'cross-site',
+'user-agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36',}
 
 textCounter = 0
 linkCounter = 0
@@ -42,7 +44,7 @@ def retrieveDictionary():
     return localData
 
 def dataCollection(inc_website : str, inc_dataType: str):
-    lobj_response = requests.get(inc_website)
+    lobj_response = requests.get(inc_website,headers=headers)
     if lobj_response.status_code == 200:
         print("Connected to " + inc_website)
         site = BeautifulSoup(lobj_response.text,"html.parser")
@@ -86,18 +88,6 @@ def collectAllImg(inc_site: BeautifulSoup, inc_input_url: str):
         addToDictionary(dataPoint)
         
 
-def collectAllVideos(inc_site: BeautifulSoup):
-    global videoCounter
-    #Below is a counter to label videos
-    videoNumber = 1
-    
-    video_tags = inc_site.findAll('video')
-    print("Total ", len(video_tags), "videos found")
-    for videos in inc_site.find_all('video'):
-        videoSource = videos.attrs['src']
-        videoCounter += 1
-        videoNumber += 1
-
 def collectAllStrings(inc_site: BeautifulSoup):
     global textCounter
     for text in inc_site.find_all(['p','title','a']):
@@ -106,7 +96,7 @@ def collectAllStrings(inc_site: BeautifulSoup):
             #baseText = re.sub('\ {2,}', '', baseText)
             newText = re.sub('\n*', '', baseText)
             if newText != '':
-                dataPoint = siteObject("text","text","0mb",newText)
+                dataPoint = siteObject("text","text",newText.__sizeof__,newText)
                 textCounter += 1
                 addToDictionary(dataPoint)
             
@@ -122,6 +112,7 @@ def collectAllLinks(inc_site: BeautifulSoup):
         linkCounter += 1
         addToDictionary(dataPoint)
 
+#Adds the object that is being passed into the function into the over arching dictionary of objects scraped from the site
 def addToDictionary(inc_object : siteObject):
     global dataSet
     global dictIndex
@@ -129,7 +120,7 @@ def addToDictionary(inc_object : siteObject):
     dictIndex += 1
 
 # This will return all data of one type
-# Currently it just prints the information but depending on the type it will download an instance of the data
+# Currently it just returns the information based on the type
 def retrieveDataByType(inc_dataType):
     global dataSet
     listOfData = []
@@ -140,6 +131,8 @@ def retrieveDataByType(inc_dataType):
     #    print(instance.dataName, " : ", instance.data)
     return listOfData
 
+# This will return data by a certain name (only works for images at the moment)
+# Currently it just returns the data based on the name
 def retrieveDataByName(inc_dataName):
     global dataSet
     for dataIndex in dataSet:
@@ -151,16 +144,47 @@ def retrieveDataByName(inc_dataName):
 # This function runs after Flask receives the input URL from the frontend
 # INPUT FROM FLASK #
 def webScraperInput(url: str, data_type: str):
-    try:
-        dataCollection(url, data_type)
-        results_list = retrieveDataByType(data_type)
-        print(f"Retrieved {len(results_list)} results of type {data_type} from {url}. Returning to Flask...")
-        return { "StatusCode": 200, "DataList": results_list }
-    except Exception as e:
-        return { "StatusCode": 400, "Error": str(e) }
+    if robotsText(url):
+        try:
+            dataCollection(url, data_type)
+            results_list = retrieveDataByType(data_type)
+            print(f"Retrieved {len(results_list)} results of type {data_type} from {url}. Returning to Flask...")
+            return { "StatusCode": 200, "DataList": results_list }
+        except Exception as e:
+            return { "StatusCode": 400, "Error": str(e) }
+    else:
+        return { "StatusCode": 403, "Error": str("Robots.txt hates us") }
+
     
 def downloadData(download_type: str, data: list):
     print(download_type, data)
 
 def webScraperDictionaryClear():
     dataSet.clear()
+
+def robotsText(url: str):
+    #Testing New Code
+    split_url = urlsplit(url)
+    lstr_robotUrl = split_url.scheme + "://" + split_url.netloc + "/robots.txt"
+
+    response = requests.get(lstr_robotUrl,headers=headers)
+
+    if response.status_code == 200 :
+        rp = RobotFileParser()
+        rp.parse(response.text.splitlines())
+        
+        user_agent = '*'
+        url_to_check = url
+    
+        if rp.can_fetch(user_agent, url_to_check):
+            print(f"We are allowed to access {url_to_check}")
+            return True
+        else:
+            print(f"We are NOT allowed to access {url_to_check}")
+            return False
+
+    else:
+        return False
+
+
+    
