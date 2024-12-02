@@ -11,42 +11,42 @@
 </head>
 <!-- end head -->
 
-<header>
-    <div class="title">
-        <p id="Title_block">
-            <h1>Free Access Media Fetcher</h1>
-        </p>
-    </div>
-
-    <nav>
-        <ul>
-            <li class="link"><a href="home"><h2>Home</h2></li></a>
-            <li class="link"><a href="about"><h2>About</li></h2></a>
-        </ul>
-    </nav>
-</header>
 <body>
+    <header>
+        <div class="title">
+            <h1 id="Title_block">Free Access Media Fetcher</h1>
+        </div>
+
+        <nav><!--Nav Links-->
+            <ul>
+                <li class="link"><a href="home"><h2>Home</h2></a></li>
+                <li class="link"><a href="about"><h2>About</h2></a></li>
+            </ul>
+        </nav>
+    </header>
+
     <section class="s1">
         <!-- Form on the left -->
         <div class="form-container">
-            <form class="form-main" id="GOLDEN RETRIEVER">
-                <a id="form-title"><h3>MEDIA FETCHER</h3></a>
-                <label for="url"><b>URL:</b><a class="eg"></a></label>
-                <input type="text" class="retriever" id="url_search" name="user_input_url" value="https://w3schools.com" />
+            <form class="form-main" id="GOLDEN_RETRIEVER">
+                <h3 id="form-title">MEDIA FETCHER</h3>
+                <label for="url"><b>URL:</b></label>
+                <input type="text" class="retriever" id="url_search" name="user_input_url" value=https://pets.hsppr.org/ />
                 <input type="submit" value="Search" id="search_button" class="scraper" /><br />
-     
+
                 <!-- Filter Box -->
                 <div class="filter-box">
                     <h4>Data Type Selection</h4>
                     <form>
-                    <input type="radio" class="retriever" id="webpage" name="retriever_selection" value="web_page" />
-                    <label>Web Page</label><br>
-                    
-                    <input type="radio" class="retriever" id="text" name="retriever_selection" value="text" />
-                    <label>Text Blocks</label><br>
-                    
-                    <input type="radio" class="retriever" id="Photos" name="retriever_selection" value="image" checked /><!-- defalt checked box -->
-                    <label>Photos</label><br>    
+                        <!--Radio Selection -->
+                        <input type="radio" class="retriever" id="webpage" name="retriever_selection" value="web_page" />
+                        <label for="webpage">Web Page</label><br>
+
+                        <input type="radio" class="retriever" id="text" name="retriever_selection" value="text" />
+                        <label for="text">Text Blocks</label><br>
+
+                        <input type="radio" class="retriever" id="Photos" name="retriever_selection" value="image" checked />
+                        <label for="Photos">Photos</label><br>
                     </form>
                 </div>
             </form>
@@ -54,23 +54,22 @@
 
         <!-- Table on the right -->
         <section id="output">
-
-            <table id= "controls">
+            <table id="controls">
                 <thead>
-                    <tr id="controll_panel" class="control">
-                        <th class="control"><button type="button" class="button" id="Select_All">Select All</button></th>
-                        <th class="control"><button type="button" class="button" id="Deselect_All">Deselect All</button></th>
-                        <th class="control"><button type="button" class="button" id="Remove">Remove</button></th>
-                        <th class="control"><button type="button" class="button" id="Remove_All">Remove All</button></th>
-                        <th class="control"><button type="button" class="button" id="download_raw">Download Raw</button></th>
-                        <th class="control"><button type="button" class="button" id="download_zip">Download Zip</button></th>
+                    <!--Controls -->
+                    <tr id="control_panel" class="control">
+                        <th><button type="button" id="Select_All">Select All</button></th>
+                        <th><button type="button" id="Deselect_All">Deselect All</button></th>
+                        <th><button type="button" id="Remove">Remove</button></th>
+                        <th><button type="button" id="Remove_All">Remove All</button></th>
+                        <th><button type="button" id="download_raw">Download Raw</button></th>
+                        <th><button type="button" id="download_zip">Download Zip</button></th>
                     </tr>
                 </thead>
-                </table>
+            </table>
 
-
-
-                <table id="output_table">
+            <!-- Table Header-->
+            <table id="output_table">
                 <thead>
                     <tr>
                         <th>Type</th>
@@ -82,17 +81,18 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- Empty Space For Input Slots -->
                 </tbody>
             </table>
         </section>
     </section>
 
+
+    <!-- Trailing Footer -->
     <section class="s2">
-        <div id="d1">
-        </div>
+        <p>Free Access Media Fetcher - Your tool for Media and data extraction.</p>
     </section>
 
-    <section id="s3"></section>
     <script type="text/javascript" src="../static/js/main.js"></script>
 </body>
 </html>
