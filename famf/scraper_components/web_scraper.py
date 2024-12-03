@@ -1,11 +1,10 @@
-import requests
-import sys
-import regex as re
-from urllib.parse import urlsplit
-from urllib.robotparser import RobotFileParser
 from bs4 import BeautifulSoup
 from datetime import datetime
-import os
+from urllib.parse import urlsplit
+from urllib.robotparser import RobotFileParser
+import os, shutil, sys
+import regex as re
+import requests
 
 # Global Variables
 
@@ -32,9 +31,6 @@ dataSet = {}
 dictIndex = 0
 validDataTypes = ['web_page', 'text', 'image', 'audio']
 validImageTypes = ['.jpg', '.png', '.gif', '.svg']
-
-downloads_path = './downloads'
-text_filename = 'downloaded_text'
 
 class siteObject:
     def __init__(self,dataType,dataName,dataSize,data):
@@ -99,7 +95,6 @@ def collectAllStrings(inc_site: BeautifulSoup):
     for text in inc_site.find_all(['p','title','a','span']):
         for child in text.contents:
             baseText = child.get_text().strip()
-            #baseText = re.sub('\ {2,}', '', baseText)
             newText = re.sub('\n*', '', baseText)
             if newText != '':
                 dataPoint = siteObject("text","text", sys.getsizeof(newText),newText)
@@ -161,26 +156,37 @@ def webScraperInput(url: str, data_type: str):
 
     
 def downloadData(download_type: str, data: list):
-    
+
+    downloads_path = './downloads'
     text_list = [] # Store all the text in the same variable
     try:
-        checkDownloadsFolder() # Create downloads folder if it doesn't exist
+        checkDownloadsFolder(downloads_path) # Create downloads folder if it doesn't exist
+
+        # If downloading as zip, create a temp folder that we'll compress after downloading
+        if download_type == "download_zip":
+            downloads_path = downloads_path + '/' + 'zipped_download_' + str(datetime.now().time()).replace(':' ,'.')
+            os.mkdir(downloads_path)
+            
         for item in data: 
             if item['type'] == 'image' :
                 photoLink = item['link']
-                downloadImage(photoLink)
+                downloadImage(photoLink, downloads_path)
             elif item['type'] == 'text' :
                 textBlock = "\n "  + item['text']
                 text_list.append(textBlock)
             else:
                 print("This type has not yet been implemented")
         if len(text_list) > 0:
-            downloadText(text_list)
+            downloadText(text_list, downloads_path)
+
+        if download_type == "download_zip":
+            shutil.make_archive(downloads_path, 'zip', downloads_path) # Create zip archive
+            shutil.rmtree(downloads_path) # Remove temp download folder
         return { "StatusCode": 200 }
     except Exception as e:
         return { "StatusCode": 400, "Error": str(e) }
         
-def downloadImage(image_url):
+def downloadImage(image_url, downloads_path):
     response = requests.get(image_url)
 
     if response.status_code == 200:
@@ -201,7 +207,8 @@ def downloadImage(image_url):
     else:
         return { "StatusCode": response.status_code, "Error": "Failed to retrieve the image." }
 
-def downloadText(text_list):
+def downloadText(text_list, downloads_path):
+    text_filename = 'downloaded_text'
     final_path = downloads_path + '/' + text_filename + '_' + str(datetime.now().time()).replace(':' ,'.') + '.txt'
 
     if os.path.exists(final_path):
@@ -212,10 +219,10 @@ def downloadText(text_list):
             file.writelines(text_list)
     return { "StatusCode": 200 }
 
-def checkDownloadsFolder():
-    if not os.path.exists(downloads_path):
+def checkDownloadsFolder(path: str):
+    if not os.path.exists(path):
         try:
-            os.mkdir(downloads_path)
+            os.mkdir(path)
         except Exception as e:
             print(e)
 
