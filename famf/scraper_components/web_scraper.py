@@ -75,23 +75,26 @@ def dataCollection(inc_website : str, inc_dataType: str):
 
 #Collects all image tags from the site and throws them into the dictionary
 def collectAllImg(inc_site: BeautifulSoup, inc_input_url: str):
-    #One is for counting images in a page
-    global imageCounter
-    #This one is for labelling images without alt text
-    imageNumber = 1
-    for imgs in inc_site.find_all('img'):
-        imageSource = imgs.attrs['src']
-        if 'http' not in imageSource and not (imageSource.startswith("//")):
-            imageSource = inc_input_url + "/" + imageSource
-        if imageSource.startswith("//"):
-            imageSource = imageSource.replace("//","")
-        imageName = imgs.get('alt')
-        if imageName is None:
-            imageName = "Unknown Image " + str(imageNumber)
-        dataPoint = siteObject("image", imageName, 0, imageSource)
-        imageCounter += 1
-        imageNumber += 1
-        addToDictionary(dataPoint)
+    try:
+        #One is for counting images in a page
+        global imageCounter
+        #This one is for labelling images without alt text
+        imageNumber = 1
+        for imgs in inc_site.find_all('img'):
+            imageSource = imgs.attrs['src']
+            if 'http' not in imageSource and not (imageSource.startswith("//")):
+                imageSource = inc_input_url + "/" + imageSource
+            if imageSource.startswith("//"):
+                imageSource = imageSource.replace("//","")
+            imageName = imgs.get('alt')
+            if imageName is None:
+                imageName = "Unknown Image " + str(imageNumber)
+            dataPoint = siteObject("image", imageName, 0, imageSource)
+            imageCounter += 1
+            imageNumber += 1
+            addToDictionary(dataPoint)
+    except Exception as e:
+        pass
 
 #Collects all strings from the site's various tag types and stores them within the dictionary
 def collectAllStrings(inc_site: BeautifulSoup):
@@ -194,7 +197,7 @@ def downloadData(download_type: str, data: list):
         return { "StatusCode": 400, "Error": str(e) }
 
 
-#This functions uses a provide link to download an image from the source
+# This function uses a provide link to download an image from the source
 def downloadImage(image_url, downloads_path):
     response = requests.get(image_url)
 

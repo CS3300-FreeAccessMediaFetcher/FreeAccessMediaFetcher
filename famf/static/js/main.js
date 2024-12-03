@@ -266,9 +266,9 @@ function addElementToTable(type, name, size, data, checked = true, preview) {
             sizeCell.textContent = width + "x" + height;
             img.width = 100;
             img.height = 100;
+            img.alt = name;
+            previewCell.appendChild(img);
         }
-        img.alt = name;
-        previewCell.appendChild(img);
     }
     else if (type === "text") {
         const p = document.createElement("p");
