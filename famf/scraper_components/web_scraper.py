@@ -1,24 +1,31 @@
 import requests
+import sys
 import regex as re
 from urllib.parse import urlsplit
 from urllib.robotparser import RobotFileParser
 from bs4 import BeautifulSoup
+import winreg
+import os
 
 
 
 
 # Global Variables
 
-headers = {'accept':'*/*',
-'accept-encoding':'gzip, deflate, br',
-'accept-language':'en-GB,en;q=0.9,en-US;q=0.8,hi;q=0.7,la;q=0.6',
-'cache-control':'no-cache',
-'dnt':'1',
-'pragma':'no-cache',
-'referer':'https',
-'sec-fetch-mode':'no-cors',
-'sec-fetch-site':'cross-site',
-'user-agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36',}
+headers = {'User-Agent':
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36',
+            'Accept-Language': 'en-US, en;q=0.5'}
+
+# headers = {'accept':'*/*',
+# 'accept-encoding':'gzip, deflate, br',
+# 'accept-language':'en-GB,en;q=0.9,en-US;q=0.8,hi;q=0.7,la;q=0.6',
+# 'cache-control':'no-cache',
+# 'dnt':'1',
+# 'pragma':'no-cache',
+# 'referer':'https',
+# 'sec-fetch-mode':'no-cors',
+# 'sec-fetch-site':'cross-site',
+# 'user-agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36',}
 
 textCounter = 0
 linkCounter = 0
@@ -82,21 +89,20 @@ def collectAllImg(inc_site: BeautifulSoup, inc_input_url: str):
         imageName = imgs.get('alt')
         if imageName is None:
             imageName = "Unknown Image " + str(imageNumber)
-        dataPoint = siteObject("image",imageName,"0mb",imageSource)
+        dataPoint = siteObject("image",imageName,sys.getsizeof(imageSource),imageSource)
         imageCounter += 1
         imageNumber += 1
         addToDictionary(dataPoint)
-        
 
 def collectAllStrings(inc_site: BeautifulSoup):
     global textCounter
-    for text in inc_site.find_all(['p','title','a']):
+    for text in inc_site.find_all(['p','title','a','span']):
         for child in text.contents:
             baseText = child.get_text().strip()
             #baseText = re.sub('\ {2,}', '', baseText)
             newText = re.sub('\n*', '', baseText)
             if newText != '':
-                dataPoint = siteObject("text","text",newText.__sizeof__,newText)
+                dataPoint = siteObject("text","text", sys.getsizeof(newText),newText)
                 textCounter += 1
                 addToDictionary(dataPoint)
             
@@ -108,7 +114,7 @@ def collectAllLinks(inc_site: BeautifulSoup):
         else:
             linkName = "Unlabeled Link"
         link = atags.get("href")
-        dataPoint = siteObject("link",linkName,"0mb",link)
+        dataPoint = siteObject("link",linkName,sys.getsizeof(link),link)
         linkCounter += 1
         addToDictionary(dataPoint)
 
@@ -158,6 +164,58 @@ def webScraperInput(url: str, data_type: str):
     
 def downloadData(download_type: str, data: list):
     print(download_type, data)
+    download_path = retrieveDownloadsFolder()
+
+    #The following variable is to store all the text in the same variable
+    text_list = []
+    for item in data: 
+        if item['type'] == 'image' :
+            photoLink = item['link']
+            downloadImage(photoLink,download_path)
+            # print(photoLink)
+        elif item['type'] == 'text' :
+            textBlock = "\n "  + item['text']
+            text_list.append(textBlock)
+            # print(text_list)
+        else:
+            print("This type has not yet been implemented")
+    if len(text_list) > 0:
+        downloadText(text_list,download_path)
+        
+def downloadImage(image_url,download_path):
+    response = requests.get(image_url)
+    
+    if response.status_code == 200:
+        filename = re.search(r'/([\w_-]+[.](jpg|gif|png|svg))$', image_url)
+        if not filename:
+            print("Regex didn't match with the url: {}".format(image_url))
+        else:
+            final_path = download_path + filename.group(1)
+            with open(final_path, 'wb') as f:
+                f.write(response.content)
+    else:
+        print("Failed to retrieve the image. Status code:", response.status_code)
+
+def downloadText(text_list, download_path):
+    filename = "downloaded_text.txt"
+
+    final_path = download_path + filename
+
+    if os.path.exists(final_path):
+        with open("existing_file.txt", "a") as file:
+            file.writelines(text_list)
+    else:
+         with open(final_path, "w") as file:
+            file.writelines(text_list)
+        
+    
+
+def retrieveDownloadsFolder():
+    reg_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders")
+    downloads_path = winreg.QueryValueEx(reg_key, "{374DE290-123F-4565-9164-39C4925E467B}")[0] + "\\"
+    winreg.CloseKey(reg_key)
+    # print(downloads_path)
+    return downloads_path
 
 def webScraperDictionaryClear():
     dataSet.clear()
@@ -183,6 +241,9 @@ def robotsText(url: str):
             print(f"We are NOT allowed to access {url_to_check}")
             return False
 
+    elif response.status_code == 404:
+        #There is no robots.txt page
+        return True
     else:
         return False
 
