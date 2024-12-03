@@ -174,6 +174,7 @@ async function sendDownloadRequestToFlask(download_type, data) {
 
         if (response.ok) {
             const data = await response.json();
+            alert("Download complete! Files have been saved to \'downloads\' inside of the main application folder.")
             return data;
         } else {
             console.error("Server returned error:", response.status);

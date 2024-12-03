@@ -14,7 +14,7 @@ Follow these steps to install and run the application locally:
 ## Basic Usage
 1. Enter the URL of the site you wish to scrape into the URL input field on the Home page.
 2. Select the type of data you would like to scrape and then click the "Search" button. The table on the right side of the page will be populated with all results that were found.
-3. Select the data you wish to download from the table of results and click the "Download" button above the table to download it to your local machine.
+3. Select the data you wish to download from the table of results and click the desired "Download" button above the table to download it to your local machine. Files will be downloaded to a folder called "downloads" inside of the main application folder.
 
 ## Developer Documentation
 Free Access Media Fetcher is separated into three main components: **Web Scraper (Backend)**, **Web-Based UI (Frontend)**, and **Flask (API)**. 
