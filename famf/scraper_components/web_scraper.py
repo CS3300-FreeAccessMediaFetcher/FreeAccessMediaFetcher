@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from urllib.parse import urlsplit
 from urllib.robotparser import RobotFileParser
+from urllib.request import urlopen
 import os, shutil, sys
 import regex as re
 import requests
@@ -85,7 +86,7 @@ def collectAllImg(inc_site: BeautifulSoup, inc_input_url: str):
         imageName = imgs.get('alt')
         if imageName is None:
             imageName = "Unknown Image " + str(imageNumber)
-        dataPoint = siteObject("image",imageName,sys.getsizeof(imageSource),imageSource)
+        dataPoint = siteObject("image", imageName, 0, imageSource)
         imageCounter += 1
         imageNumber += 1
         addToDictionary(dataPoint)
@@ -97,7 +98,7 @@ def collectAllStrings(inc_site: BeautifulSoup):
             baseText = child.get_text().strip()
             newText = re.sub('\n*', '', baseText)
             if newText != '':
-                dataPoint = siteObject("text","text", sys.getsizeof(newText),newText)
+                dataPoint = siteObject("text", "text", str(sys.getsizeof(newText)) + ' bytes', newText)
                 textCounter += 1
                 addToDictionary(dataPoint)
             
@@ -140,8 +141,8 @@ def retrieveDataByName(inc_dataName):
             print(instance.dataName, " : ", instance.data)
 
 
-# This function runs after Flask receives the input URL from the frontend
 # INPUT FROM FLASK #
+# This function runs after Flask receives the input URL from the frontend
 def webScraperInput(url: str, data_type: str):
     if robotsText(url):
         try:
@@ -226,8 +227,15 @@ def checkDownloadsFolder(path: str):
         except Exception as e:
             print(e)
 
+# UTILITY FUNCTIONS #
 def webScraperDictionaryClear():
     dataSet.clear()
+
+def getImageSize(image_url):
+    # get file size
+    file = urlopen(image_url)
+    size = int(file.headers.get("content-length"))
+    return size   
 
 def robotsText(url: str):
     split_url = urlsplit(url)

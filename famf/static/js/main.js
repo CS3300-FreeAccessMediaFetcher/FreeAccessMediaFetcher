@@ -258,10 +258,15 @@ function addElementToTable(type, name, size, data, checked = true, preview) {
         const img = document.createElement("img");
 
         img.src = formattedLink;
-        img.width = 100;
-        img.height = 100;
+        img.onload = ({target}) => {
+            // Get WxH of image and then set to 100x100 for the preview cell
+            var width = target.width;
+            var height = target.height;
+            sizeCell.textContent = width + "x" + height;
+            img.width = 100;
+            img.height = 100;
+        }
         img.alt = name;
-
         previewCell.appendChild(img);
     }
     else if (type === "text") {
