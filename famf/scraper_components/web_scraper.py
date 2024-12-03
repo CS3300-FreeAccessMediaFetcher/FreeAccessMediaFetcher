@@ -194,8 +194,9 @@ def downloadImage(image_url, downloads_path):
         filename = image_url.split("/")[-1] # Make filename based on the image name in the URL
         valid_filename = False
         for imageType in validImageTypes:
-            if imageType in filename and not filename.endswith(imageType):
-                filename = filename.split(imageType)[0] + imageType 
+            if imageType in filename:
+                if not filename.endswith(imageType): 
+                    filename = filename.split(imageType)[0] + imageType 
                 valid_filename = True
                 break
         if not valid_filename:
