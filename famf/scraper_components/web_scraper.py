@@ -42,11 +42,13 @@ class siteObject:
 
 ###################
 
+#This allows flask to directly pull the dictionary into its level
 def retrieveDictionary():
     global dataSet
     localData = dataSet
     return localData
 
+#Wrapper function that handles all of the scraping for the site and determines what needs to be collected from the site
 def dataCollection(inc_website : str, inc_dataType: str):
     lobj_response = requests.get(inc_website,headers=headers)
     if lobj_response.status_code == 200:
@@ -71,7 +73,7 @@ def dataCollection(inc_website : str, inc_dataType: str):
     else:
         print("unable to reach site")
 
-
+#Collects all image tags from the site and throws them into the dictionary
 def collectAllImg(inc_site: BeautifulSoup, inc_input_url: str):
     #One is for counting images in a page
     global imageCounter
@@ -91,6 +93,7 @@ def collectAllImg(inc_site: BeautifulSoup, inc_input_url: str):
         imageNumber += 1
         addToDictionary(dataPoint)
 
+#Collects all strings from the site's various tag types and stores them within the dictionary
 def collectAllStrings(inc_site: BeautifulSoup):
     global textCounter
     for text in inc_site.find_all(['p','title','a','span']):
@@ -102,6 +105,8 @@ def collectAllStrings(inc_site: BeautifulSoup):
                 textCounter += 1
                 addToDictionary(dataPoint)
             
+#Scrapes all the link tags from the site and stores them
+#This is allows a future developer to add a rapid crawling functionality
 def collectAllLinks(inc_site: BeautifulSoup):
     global linkCounter
     for atags in inc_site.find_all(['a']):
@@ -155,7 +160,8 @@ def webScraperInput(url: str, data_type: str):
     else:
         return { "StatusCode": 403, "Error": str("Robots.txt hates us") }
 
-    
+
+#This is a wrapper function that calls a specific download function based on the type
 def downloadData(download_type: str, data: list):
 
     downloads_path = './downloads'
@@ -186,7 +192,9 @@ def downloadData(download_type: str, data: list):
         return { "StatusCode": 200 }
     except Exception as e:
         return { "StatusCode": 400, "Error": str(e) }
-        
+
+
+#This functions uses a provide link to download an image from the source
 def downloadImage(image_url, downloads_path):
     response = requests.get(image_url)
 
@@ -209,6 +217,8 @@ def downloadImage(image_url, downloads_path):
     else:
         return { "StatusCode": response.status_code, "Error": "Failed to retrieve the image." }
 
+
+#This function creates or checks if the file exists before downloading the list of strings provided.
 def downloadText(text_list, downloads_path):
     text_filename = 'downloaded_text'
     final_path = downloads_path + '/' + text_filename + '_' + str(datetime.now().time()).replace(':' ,'.') + '.txt'
@@ -221,6 +231,7 @@ def downloadText(text_list, downloads_path):
             file.writelines(text_list)
     return { "StatusCode": 200 }
 
+#Ensure that the chosen download path exists where it should. This function should be called before our functionality to save the scrapped data
 def checkDownloadsFolder(path: str):
     if not os.path.exists(path):
         try:
@@ -229,9 +240,12 @@ def checkDownloadsFolder(path: str):
             print(e)
 
 # UTILITY FUNCTIONS #
+
+#Clears out the dictionary that the all the data is stored in. 
 def webScraperDictionaryClear():
     dataSet.clear()
 
+# Determines the url of the robots.txt page and checks what use case we are applying to make sure that we are following the robots.txt rules applicable to the site
 def robotsText(url: str):
     split_url = urlsplit(url)
     lstr_robotUrl = split_url.scheme + "://" + split_url.netloc + "/robots.txt"
