@@ -231,12 +231,6 @@ def checkDownloadsFolder(path: str):
 def webScraperDictionaryClear():
     dataSet.clear()
 
-def getImageSize(image_url):
-    # get file size
-    file = urlopen(image_url)
-    size = int(file.headers.get("content-length"))
-    return size   
-
 def robotsText(url: str):
     split_url = urlsplit(url)
     lstr_robotUrl = split_url.scheme + "://" + split_url.netloc + "/robots.txt"
