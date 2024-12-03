@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
     searchButton.addEventListener('click', async (event) => {
         event.preventDefault(); // Prevent default form submission
 
-        const url = getURL();
+        const url = formatLink(getURL());
         const dataType = getDataType();
 
         console.log(`Selected data type: ${dataType}`);
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 for (let i = 0; i < scrapedData.length; i++){
                     item = scrapedData[i]
-                    addElementToTable(item.dataType, item.dataName, item.dataSize, item.data, true, item.data);
+                    addElementToTable(item.dataType, item.dataName, item.dataSize, item.data, false, item.data);
                 }
             }
             else {

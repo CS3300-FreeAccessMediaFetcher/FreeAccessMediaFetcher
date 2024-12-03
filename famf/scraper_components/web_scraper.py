@@ -4,17 +4,10 @@ import regex as re
 from urllib.parse import urlsplit
 from urllib.robotparser import RobotFileParser
 from bs4 import BeautifulSoup
-import winreg
+from datetime import datetime
 import os
 
-
-
-
 # Global Variables
-
-headers = {'User-Agent':
-            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36',
-            'Accept-Language': 'en-US, en;q=0.5'}
 
 # headers = {'accept':'*/*',
 # 'accept-encoding':'gzip, deflate, br',
@@ -27,6 +20,9 @@ headers = {'User-Agent':
 # 'sec-fetch-site':'cross-site',
 # 'user-agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36',}
 
+headers = {'User-Agent':
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36',
+            'Accept-Language': 'en-US, en;q=0.5'}
 textCounter = 0
 linkCounter = 0
 imageCounter = 0
@@ -35,6 +31,10 @@ otherCounter = 0
 dataSet = {}
 dictIndex = 0
 validDataTypes = ['web_page', 'text', 'image', 'audio']
+validImageTypes = ['.jpg', '.png', '.gif', '.svg']
+
+downloads_path = './downloads'
+text_filename = 'downloaded_text'
 
 class siteObject:
     def __init__(self,dataType,dataName,dataSize,data):
@@ -66,11 +66,11 @@ def dataCollection(inc_website : str, inc_dataType: str):
 
         if inc_dataType == "text":
             collectAllStrings(site)
-        elif inc_dataType == "web_page":
-            collectAllLinks(site)
         elif inc_dataType == "image":
+            collectAllImg(site, inc_website) 
+        elif inc_dataType == "web_page": # This option gets both text and images
             collectAllImg(site, inc_website)
-        # collectAllVideos(site)
+            collectAllStrings(site)
     else:
         print("unable to reach site")
 
@@ -131,10 +131,8 @@ def retrieveDataByType(inc_dataType):
     global dataSet
     listOfData = []
     for dataIndex in dataSet:
-        if dataSet[dataIndex]["dataType"] == inc_dataType:
+        if dataSet[dataIndex]["dataType"] == inc_dataType or inc_dataType == "web_page":
             listOfData.append(dataSet[dataIndex])
-    #for instance in listOfData:
-    #    print(instance.dataName, " : ", instance.data)
     return listOfData
 
 # This will return data by a certain name (only works for images at the moment)
@@ -163,69 +161,72 @@ def webScraperInput(url: str, data_type: str):
 
     
 def downloadData(download_type: str, data: list):
-    print(download_type, data)
-    download_path = retrieveDownloadsFolder()
-
-    #The following variable is to store all the text in the same variable
-    text_list = []
-    for item in data: 
-        if item['type'] == 'image' :
-            photoLink = item['link']
-            downloadImage(photoLink,download_path)
-            # print(photoLink)
-        elif item['type'] == 'text' :
-            textBlock = "\n "  + item['text']
-            text_list.append(textBlock)
-            # print(text_list)
-        else:
-            print("This type has not yet been implemented")
-    if len(text_list) > 0:
-        downloadText(text_list,download_path)
-        
-def downloadImage(image_url,download_path):
-    response = requests.get(image_url)
     
+    text_list = [] # Store all the text in the same variable
+    try:
+        checkDownloadsFolder() # Create downloads folder if it doesn't exist
+        for item in data: 
+            if item['type'] == 'image' :
+                photoLink = item['link']
+                downloadImage(photoLink)
+            elif item['type'] == 'text' :
+                textBlock = "\n "  + item['text']
+                text_list.append(textBlock)
+            else:
+                print("This type has not yet been implemented")
+        if len(text_list) > 0:
+            downloadText(text_list)
+        return { "StatusCode": 200 }
+    except Exception as e:
+        return { "StatusCode": 400, "Error": str(e) }
+        
+def downloadImage(image_url):
+    response = requests.get(image_url)
+
     if response.status_code == 200:
-        filename = re.search(r'/([\w_-]+[.](jpg|gif|png|svg))$', image_url)
-        if not filename:
-            print("Regex didn't match with the url: {}".format(image_url))
+        filename = image_url.split("/")[-1] # Make filename based on the image name in the URL
+        valid_filename = False
+        for imageType in validImageTypes:
+            if imageType in filename and not filename.endswith(imageType):
+                filename = filename.split(imageType)[0] + imageType 
+                valid_filename = True
+                break
+        if not valid_filename:
+            return { "StatusCode": 400, "Error": f"Invalid file name (image type may not be supported): {filename}" }
         else:
-            final_path = download_path + filename.group(1)
+            final_path = downloads_path + '/' + filename
             with open(final_path, 'wb') as f:
                 f.write(response.content)
+            return { "StatusCode": response.status_code }
     else:
-        print("Failed to retrieve the image. Status code:", response.status_code)
+        return { "StatusCode": response.status_code, "Error": "Failed to retrieve the image." }
 
-def downloadText(text_list, download_path):
-    filename = "downloaded_text.txt"
-
-    final_path = download_path + filename
+def downloadText(text_list):
+    final_path = downloads_path + '/' + text_filename + '_' + str(datetime.now().time()).replace(':' ,'.') + '.txt'
 
     if os.path.exists(final_path):
-        with open("existing_file.txt", "a") as file:
+        with open(final_path, "a") as file:
             file.writelines(text_list)
     else:
-         with open(final_path, "w") as file:
+        with open(final_path, "w") as file:
             file.writelines(text_list)
-        
-    
+    return { "StatusCode": 200 }
 
-def retrieveDownloadsFolder():
-    reg_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders")
-    downloads_path = winreg.QueryValueEx(reg_key, "{374DE290-123F-4565-9164-39C4925E467B}")[0] + "\\"
-    winreg.CloseKey(reg_key)
-    # print(downloads_path)
-    return downloads_path
+def checkDownloadsFolder():
+    if not os.path.exists(downloads_path):
+        try:
+            os.mkdir(downloads_path)
+        except Exception as e:
+            print(e)
 
 def webScraperDictionaryClear():
     dataSet.clear()
 
 def robotsText(url: str):
-    #Testing New Code
     split_url = urlsplit(url)
     lstr_robotUrl = split_url.scheme + "://" + split_url.netloc + "/robots.txt"
 
-    response = requests.get(lstr_robotUrl,headers=headers)
+    response = requests.get(lstr_robotUrl, headers=headers)
 
     if response.status_code == 200 :
         rp = RobotFileParser()
@@ -246,6 +247,3 @@ def robotsText(url: str):
         return True
     else:
         return False
-
-
-    

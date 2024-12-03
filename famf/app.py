@@ -52,7 +52,7 @@ def handleWebScraperInput():
 
 # Download scraped files
 @app.route('/download-handler', methods=['POST'])
-def handleDownloadRaw():
+def handleDownloads():
     try:
 
         # Retrieve data POSTed from frontend as a dictionary
